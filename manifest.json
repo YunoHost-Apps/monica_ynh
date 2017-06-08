@@ -1,0 +1,75 @@
+{
+    "name": "YunoHost monica app",
+    "id": "monica",
+    "packaging_format": 1,
+    "description": {
+        "en": "Example package for YunoHost application.",
+        "fr": "Exemple de package d’application pour YunoHost."
+    },
+    "url": "https://monica.com",
+    "license": "free",
+    "maintainer": {
+        "name": "John doe",
+        "email": "john.doe@monica.com",
+        "url": "http://monica.com"
+    },
+    "requirements": {
+        "yunohost": ">> 2.4.0"
+    },
+    "multi_instance": true,
+    "services": [
+        "nginx",
+        "php5-fpm",
+        "mysql"
+    ],
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+                "type": "domain",
+                "ask": {
+                    "en": "Choose a domain name for ynhmonica",
+                    "fr": "Choisissez un nom de domaine pour ynhmonica"
+                },
+                "monica": "monica.com"
+            },
+            {
+                "name": "path",
+                "type": "path",
+                "ask": {
+                    "en": "Choose a path for ynhmonica",
+                    "fr": "Choisissez un chemin pour ynhmonica"
+                },
+                "monica": "/monica",
+                "default": "/monica"
+            },
+            {
+                "name": "admin",
+                "type": "user",
+                "ask": {
+                    "en": "Choose an admin user",
+                    "fr": "Choisissez l’administrateur"
+                },
+                "monica": "johndoe"
+            },
+            {
+                "name": "is_public",
+                "type": "boolean",
+                "ask": {
+                    "en": "Is it a public application?",
+                    "fr": "Est-ce une application publique ?"
+                },
+                "default": true
+            },
+            {
+                "name": "language",
+                "ask": {
+                    "en": "Choose the application language",
+                    "fr": "Choisissez la langue de l'application"
+                },
+                "choices": ["fr", "en"],
+                "default": "fr"
+            }
+        ]
+    }
+}
