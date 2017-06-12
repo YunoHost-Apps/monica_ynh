@@ -83,7 +83,8 @@ sudo sed -i "s/yunopass/$dbpass/g" $final_path/.env
 sudo sed -i "s/yunobase/$dbname/g" $final_path/.env
 sudo sed -i "s/yunomail/$email/g" $final_path/.env
 sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
-sudo sed -i "s/yunopath/$path_url/g" $final_path/.env
+# uses commas because path url contains a slash
+sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
 
 # Install nodejs packages
 cd $final_path && sudo_path "$nodejs_path/npm" install -g npm@4 pnpm
