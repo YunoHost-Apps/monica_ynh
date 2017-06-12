@@ -1,2 +1,2 @@
-SOURCE_URL=url of app's source
-SOURCE_SUM=md5 or sha1 checksum
+SOURCE_URL=https://github.com/monicahq/monica/archive/c94da55a.tar.gz
+SOURCE_SUM=4549434bb9fa004df2b8bb704d1e069ad390cf2fa6436dd1cda893155ae86ba2
