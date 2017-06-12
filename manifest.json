@@ -3,15 +3,14 @@
     "id": "monica",
     "packaging_format": 1,
     "description": {
-        "en": "Example package for YunoHost application.",
-        "fr": "Exemple de package d’application pour YunoHost."
+        "en": " Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family. https://monicahq.com"
     },
     "url": "https://monica.com",
     "license": "free",
     "maintainer": {
-        "name": "John doe",
-        "email": "john.doe@monica.com",
-        "url": "http://monica.com"
+        "name": "Sebastian Gumprich",
+        "email": "yunohost@gumpri.ch",
+        "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
         "yunohost": ">> 2.4.0"
@@ -59,7 +58,7 @@
                     "en": "Is it a public application?",
                     "fr": "Est-ce une application publique ?"
                 },
-                "default": true
+                "default": false
             },
             {
                 "name": "language",
@@ -68,7 +67,7 @@
                     "fr": "Choisissez la langue de l'application"
                 },
                 "choices": ["fr", "en"],
-                "default": "fr"
+                "default": "en"
             }
         ]
     }
