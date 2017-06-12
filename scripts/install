@@ -54,23 +54,36 @@ ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
 
 ynh_install_nodejs 6.10.3
 
-extract_monica $final_path
+#extract_monica $final_path
+ynh_setup_source $final_path
+
 init_composer $final_path
+
+first_name=$(ynh_user_get_info $admin 'firstname')
+last_name=$(ynh_user_get_info $admin 'lastname')
+email=$(ynh_user_get_info $admin 'mail')
+
+sudo sed -i "s/yuno_firstname/$first_name/g"  ../conf/CreateUser.php
+sudo sed -i "s/yuno_lastname/$last_name/g" ../conf/CreateUser.php
+sudo sed -i "s/yuno_email/$email/g" ../conf/CreateUser.php
+sudo  cp ../conf/CreateUser.php $final_path/database/seeds/CreateUser.php
 
 # Modify Nginx configuration file and copy it to Nginx conf directory
 nginx_conf=../conf/nginx.conf
-sed -i "s@YNH_EXAMPLE_PATH@$path_url@g" ../conf/nginx.conf
-sed -i "s@YNH_WWW_PATH@$final_path\/public@g" $nginx_conf
+sudo sed -i "s@YNH_EXAMPLE_PATH@$path_url@g" ../conf/nginx.conf
+sudo sed -i "s@YNH_WWW_PATH@$final_path\/public\/@g" $nginx_conf
 sudo cp $nginx_conf /etc/nginx/conf.d/$domain.d/$app.conf
 
-sudo cp ../conf/.env $final_path/.env
-cd $final_path && php artisan -q -n key:generate
+sudo  cp ../conf/.env $final_path/.env
+cd $final_path && php artisan -n key:generate --force
 cd $final_path && php artisan config:clear
 
 sudo sed -i "s/yunouser/$dbuser/g" $final_path/.env
 sudo sed -i "s/yunopass/$dbpass/g" $final_path/.env
 sudo sed -i "s/yunobase/$dbname/g" $final_path/.env
-
+sudo sed -i "s/yunomail/$email/g" $final_path/.env
+sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
+sudo sed -i "s/yunopath/$path_url/g" $final_path/.env
 
 # Install nodejs packages
 cd $final_path && sudo_path "$nodejs_path/npm" install -g npm@4 pnpm
@@ -78,8 +91,12 @@ cd $final_path && sudo_path "$nodejs_path/pnpm" install
 cd $final_path && sudo_path "$nodejs_path/pnpm" install -g bower gulp
 cd $final_path && sudo_path "$nodejs_path/bower" install -f --allow-root
 
-cd $final_path && php artisan -q -n migrate
-cd $final_path && php artisan -q -n storage:link
+cd $final_path && php artisan -q migrate --force
+cd $final_path && php artisan -q storage:link
+cd $final_path && php artisan -q optimize
+cd $final_path && php artisan -q db:seed --class ActivityTypesTableSeeder --force
+cd $final_path && php artisan -q db:seed --class CountriesSeederTable --force
+cd $final_path && php artisan -q db:seed --class CreateUser --force
 
 # Install files and set permissions
 sudo chown -R www-data: "$final_path"
