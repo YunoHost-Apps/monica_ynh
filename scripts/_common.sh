@@ -3,7 +3,7 @@
 #
 
 # monica git version
-VERSION="e5cae3f"
+VERSION="c94da55a"
 
 # Remote URL to fetch monica source tarball
 MONICA_SOURCE_URL="https://github.com/monicahq/monica/archive/${VERSION}.tar.gz"
@@ -26,7 +26,7 @@ extract_monica() {
     || ynh_die "Unable to download monica tarball"
   tar xf "$rc_tarball" -C "$DESTDIR" --strip-components 1 \
     || ynh_die "Unable to extract monica tarball"
-  rm "$rc_tarball"
+  sudo rm "$rc_tarball"
 }
 
 # Execute a command as another user
