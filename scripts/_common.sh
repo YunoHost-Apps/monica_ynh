@@ -50,7 +50,7 @@ exec_composer() {
   shift 1
 
   COMPOSER_HOME="${WORKDIR}/.composer" \
-    php "${WORKDIR}/composer.phar" $@ \
+    /usr/bin/php7.0 "${WORKDIR}/composer.phar" $@ \
       -d "${WORKDIR}" --quiet --no-interaction
 }
 
@@ -63,7 +63,7 @@ init_composer() {
   # install composer
   curl -sS https://getcomposer.org/installer \
     | COMPOSER_HOME="${DESTDIR}/.composer" \
-        php -- --quiet --install-dir="$DESTDIR" \
+        /usr/bin/php7.0 -- --quiet --install-dir="$DESTDIR" \
     || ynh_die "Unable to install Composer"
 
   # update dependencies to create composer.lock
@@ -156,5 +156,21 @@ ynh_remove_nodejs () {
 		ynh_secure_remove "$nvm_install_dir"
 		sudo sed --in-place "/NVM_DIR/d" /root/.bashrc
 	fi
+}
+
+ynh_install_php7 () {
+  sudo echo 'deb https://packages.dotdeb.org jessie all' > /etc/apt/sources.list.d/dotdeb.list
+  curl http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
+  ynh_package_update
+  ynh_package_install apt-transport-https --no-install-recommends
+  ynh_package_install php7.0 php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring --no-install-recommends
+  sudo update-alternatives --install /usr/bin/php php /usr/bin/php5 70
+}
+
+ynh_remove_php7 () {
+  sudo rm -f /etc/apt/sources.list.d/dotdeb.list
+  sudo apt-key del 4096R/89DF5277
+  ynh_package_update
+  ynh_package_remove php7.0 php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring
 }
 

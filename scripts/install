@@ -40,6 +40,8 @@ final_path=/var/www/$app
 sudo mkdir -p $final_path
 sudo chmod 775 $final_path
 
+ynh_install_php7
+
 ### MySQL (can be removed if not used) ###
 # If your app use a MySQL database you can use these lines to bootstrap
 # a database, an associated user and save the password in app settings.
@@ -74,16 +76,17 @@ sudo sed -i "s@YNH_EXAMPLE_PATH@$path_url@g" ../conf/nginx.conf
 sudo sed -i "s@YNH_WWW_PATH@$final_path\/public\/@g" $nginx_conf
 sudo cp $nginx_conf /etc/nginx/conf.d/$domain.d/$app.conf
 
+# setup application config
 sudo  cp ../conf/.env $final_path/.env
-cd $final_path && php artisan -n key:generate --force
-cd $final_path && php artisan config:clear
+cd $final_path && /usr/bin/php7.0 artisan -n key:generate --force
+cd $final_path && /usr/bin/php7.0 artisan config:clear
 
 sudo sed -i "s/yunouser/$dbuser/g" $final_path/.env
 sudo sed -i "s/yunopass/$dbpass/g" $final_path/.env
 sudo sed -i "s/yunobase/$dbname/g" $final_path/.env
 sudo sed -i "s/yunomail/$email/g" $final_path/.env
 sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
-# uses commas because path url contains a slash
+## uses commas because path url contains a slash
 sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
 
 # Install nodejs packages
@@ -92,16 +95,21 @@ cd $final_path && sudo_path "$nodejs_path/pnpm" install
 cd $final_path && sudo_path "$nodejs_path/pnpm" install -g bower gulp
 cd $final_path && sudo_path "$nodejs_path/bower" install -f --allow-root
 
-cd $final_path && php artisan -q migrate --force
-cd $final_path && php artisan -q storage:link
-cd $final_path && php artisan -q optimize
-cd $final_path && php artisan -q db:seed --class ActivityTypesTableSeeder --force
-cd $final_path && php artisan -q db:seed --class CountriesSeederTable --force
-cd $final_path && php artisan -q db:seed --class CreateUser --force
+# setup application config
+cd $final_path && /usr/bin/php7.0 artisan -q migrate --force
+cd $final_path && /usr/bin/php7.0 artisan -q storage:link
+cd $final_path && /usr/bin/php7.0 artisan -q optimize
+cd $final_path && /usr/bin/php7.0 artisan -q db:seed --class ActivityTypesTableSeeder --force
+cd $final_path && /usr/bin/php7.0 artisan -q db:seed --class CountriesSeederTable --force
+cd $final_path && /usr/bin/php7.0 artisan -q db:seed --class CreateUser --force
+
+# create a cronjob to run the scheduler
+echo "* * * * * www-data cd $final_path && /usr/bin/php7.0 $final_path/artisan schedule:run >/dev/null 2>&1" > /tmp/cron$app
+sudo mv /tmp/cron$app /etc/cron.d/$app
+sudo chown root /etc/cron.d/$app
 
 # Install files and set permissions
 sudo chown -R www-data: "$final_path"
-
 
 # If app is public, add url to SSOWat conf as skipped_uris
 if [[ $is_public -eq 1 ]]; then
