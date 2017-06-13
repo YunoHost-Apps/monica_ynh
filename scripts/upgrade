@@ -3,57 +3,64 @@
 # Exit on command errors and treat unset variables as an error
 set -eu
 
-# See comments in install script
 app=$YNH_APP_INSTANCE_NAME
 
 # Source YunoHost helpers
 source /usr/share/yunohost/helpers
+source ./_common.sh
 
-# Retrieve app settings
-domain=$(ynh_app_setting_get "$app" domain)
-path_url=$(ynh_app_setting_get "$app" path_url)
+# Get app settings
 admin=$(ynh_app_setting_get "$app" admin)
 is_public=$(ynh_app_setting_get "$app" is_public)
 language=$(ynh_app_setting_get "$app" language)
-
-# Remove trailing "/" for next commands
-path_url=${path_url%/}
+domain=$(ynh_app_setting_get "$app" domain)
+path_url=$(ynh_app_setting_get "$app" path)
 
 # Copy source files
-src_path=/var/www/$app
-sudo mkdir -p $src_path
-sudo cp -a ../sources/. $src_path
+final_path=/var/www/$app
 
-# Set permissions to app files
-# you may need to make some file and/or directory writeable by www-data (nginx user)
-sudo chown -R root: $src_path
-
-# Modify Nginx configuration file and copy it to Nginx conf directory
-nginx_conf=../conf/nginx.conf
-sed -i "s@YNH_WWW_PATH@$path_url@g" $nginx_conf
-sed -i "s@YNH_WWW_ALIAS@$src_path/@g" $nginx_conf
-# If a dedicated php-fpm process is used:
+### MySQL (can be removed if not used) ###
+# If your app use a MySQL database you can use these lines to bootstrap
+# a database, an associated user and save the password in app settings.
 #
-# sed -i "s@YNH_WWW_APP@$app@g" $nginx_conf
-sudo cp $nginx_conf /etc/nginx/conf.d/$domain.d/$app.conf
+# # Generate MySQL password and create database
+dbuser=$app
+dbname=$app
+dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 
-### PHP (remove if not used) ###
-# If a dedicated php-fpm process is used:
-# # Modify PHP-FPM pool configuration and copy it to the pool directory
-# sed -i "s@YNH_WWW_APP@$app@g" ../conf/php-fpm.conf
-# sed -i "s@YNH_WWW_ALIAS@$src_path/@g" ../conf/php-fpm.conf
-# finalphpconf=/etc/php5/fpm/pool.d/$app.conf
-# sudo cp ../conf/php-fpm.conf $finalphpconf
-# sudo chown root: $finalphpconf
-# sudo chmod 644 $finalphpconf
-# sudo service php5-fpm restart
-### PHP end ###
+# extract_monica $final_path
+ynh_setup_source $final_path
+
+# create a user
+first_name=$(ynh_user_get_info $admin 'firstname')
+last_name=$(ynh_user_get_info $admin 'lastname')
+email=$(ynh_user_get_info $admin 'mail')
+
+sudo sed -i "s/yuno_firstname/$first_name/g"  ../conf/CreateUser.php
+sudo sed -i "s/yuno_lastname/$last_name/g" ../conf/CreateUser.php
+sudo sed -i "s/yuno_email/$email/g" ../conf/CreateUser.php
+sudo  cp ../conf/CreateUser.php $final_path/database/seeds/CreateUser.php
+
+# setup application config
+sudo  cp ../conf/.env $final_path/.env
+
+sudo sed -i "s/yunouser/$dbuser/g" $final_path/.env
+sudo sed -i "s/yunopass/$dbpass/g" $final_path/.env
+sudo sed -i "s/yunobase/$dbname/g" $final_path/.env
+sudo sed -i "s/yunomail/$email/g" $final_path/.env
+sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
+# uses commas because path url contains a slash
+sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
+
+# setup application config
+cd $final_path && /usr/bin/php7.0 artisan -q migrate --force
+cd $final_path && /usr/bin/php7.0 artisan -q optimize
+
+# Install files and set permissions
+sudo chown -R www-data: "$final_path"
 
 # If app is public, add url to SSOWat conf as skipped_uris
 if [[ $is_public -eq 1 ]]; then
-  # See install script
+  # unprotected_uris allows SSO credentials to be passed anyway.
   ynh_app_setting_set "$app" unprotected_uris "/"
 fi
-
-# Reload nginx service
-sudo service nginx reload
