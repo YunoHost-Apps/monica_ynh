@@ -7,9 +7,9 @@ set -eu
 # The id of the app as stated in the manifest is available as $YNH_APP_ID
 # The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
 # The app instance name is available as $YNH_APP_INSTANCE_NAME
-#    - the first time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample
-#    - the second time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample__2
-#    - ynhexample__{N} for the subsequent installations, with N=3,4, ...
+#    - the first time the app is installed, YNH_APP_INSTANCE_NAME = monica
+#    - the second time the app is installed, YNH_APP_INSTANCE_NAME = monica__2
+#    - monica__{N} for the subsequent installations, with N=3,4, ...
 # The app instance name is probably what you are interested the most, since this is
 # guaranteed to be unique. This is a good unique identifier to define installation path,
 # db names, ...
@@ -54,13 +54,16 @@ dbpass=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d '[A-Za-z0-9]'
 ynh_app_setting_set "$app" mysqlpwd "$dbpass"
 ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
 
+# install nodejs
 ynh_install_nodejs 6.10.3
 
-#extract_monica $final_path
+# extract monica into $final_path
 ynh_setup_source $final_path
 
+# install composer
 init_composer $final_path
 
+# create a user
 first_name=$(ynh_user_get_info $admin 'firstname')
 last_name=$(ynh_user_get_info $admin 'lastname')
 email=$(ynh_user_get_info $admin 'mail')
