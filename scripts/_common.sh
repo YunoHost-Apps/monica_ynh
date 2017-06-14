@@ -22,9 +22,9 @@ extract_monica() {
 
   # retrieve and extract monica tarball
   rc_tarball="${DESTDIR}/monica.tar.gz"
-  wget -q -O "$rc_tarball" "$MONICA_SOURCE_URL" \
+  sudo wget -q -O "$rc_tarball" "$MONICA_SOURCE_URL" \
     || ynh_die "Unable to download monica tarball"
-  tar xf "$rc_tarball" -C "$DESTDIR" --strip-components 1 \
+  sudo tar xf "$rc_tarball" -C "$DESTDIR" --strip-components 1 \
     || ynh_die "Unable to extract monica tarball"
   sudo rm "$rc_tarball"
 }
