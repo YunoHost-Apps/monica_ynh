@@ -15,18 +15,33 @@ PKGDIR=$(cd ../; pwd)
 # Common helpers
 #
 
-# Download and extract monica sources to the given directory
-# usage: extract_monica_to DESTDIR
-extract_monica() {
-  local DESTDIR=$1
 
-  # retrieve and extract monica tarball
-  rc_tarball="${DESTDIR}/monica.tar.gz"
-  wget -q -O "$rc_tarball" "$MONICA_SOURCE_URL" \
-    || ynh_die "Unable to download monica tarball"
-  tar xf "$rc_tarball" -C "$DESTDIR" --strip-components 1 \
-    || ynh_die "Unable to extract monica tarball"
-  sudo rm "$rc_tarball"
+# Remove a file or a directory securely
+#
+# usage: ynh_secure_remove path_to_remove
+# | arg: path_to_remove - File or directory to remove
+ynh_secure_remove () {
+	path_to_remove=$1
+	forbidden_path=" \
+	/var/www \
+	/home/yunohost.app"
+
+	if [[ "$forbidden_path" =~ "$path_to_remove" \
+		# Match all paths or subpaths in $forbidden_path
+		|| "$path_to_remove" =~ ^/[[:alnum:]]+$ \
+		# Match all first level paths from / (Like /var, /root, etc...)
+		|| "${path_to_remove:${#path_to_remove}-1}" = "/" ]]
+		# Match if the path finishes by /. Because it seems there is an empty variable
+	then
+		echo "Avoid deleting $path_to_remove." >&2
+	else
+		if [ -e "$path_to_remove" ]
+		then
+			sudo rm -R "$path_to_remove"
+		else
+			echo "$path_to_remove wasn't deleted because it doesn't exist." >&2
+		fi
+	fi
 }
 
 # Execute a command as another user
@@ -167,7 +182,7 @@ ynh_remove_nodejs () {
 #
 
 ynh_install_php7 () {
-  sudo echo 'deb https://packages.dotdeb.org jessie all' > /etc/apt/sources.list.d/dotdeb.list
+  echo "deb https://packages.dotdeb.org jessie all" | sudo tee --append "/etc/apt/sources.list.d/dotdeb.list"
   curl http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
   ynh_package_update
   ynh_package_install apt-transport-https --no-install-recommends
