@@ -24,6 +24,9 @@ sudo rm -f /etc/cron.d/$app
 # Remove PHP7.0
 ynh_remove_php7
 
+# Remove NodeJS
+ynh_remove_nodejs
+
 # Remove mysql user and database
 dbname=$app
 dbuser=$app
