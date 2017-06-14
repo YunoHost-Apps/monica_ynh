@@ -15,6 +15,19 @@ PKGDIR=$(cd ../; pwd)
 # Common helpers
 #
 
+# Download and extract monica sources to the given directory
+# usage: extract_monica_to DESTDIR
+extract_monica() {
+  local DESTDIR=$1
+
+  # retrieve and extract monica tarball
+  rc_tarball="${DESTDIR}/monica.tar.gz"
+  wget -q -O "$rc_tarball" "$MONICA_SOURCE_URL" \
+    || ynh_die "Unable to download monica tarball"
+  tar xf "$rc_tarball" -C "$DESTDIR" --strip-components 1 \
+    || ynh_die "Unable to extract monica tarball"
+  sudo rm "$rc_tarball"
+}
 
 # Remove a file or a directory securely
 #
@@ -182,8 +195,18 @@ ynh_remove_nodejs () {
 #
 
 ynh_install_php7 () {
-  echo "deb https://packages.dotdeb.org jessie all" | sudo tee --append "/etc/apt/sources.list.d/dotdeb.list"
-  curl http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
+  architecture=$(uname -m)
+  if [ $architecture == "armv7l" ]; then
+    # arm package
+    echo "deb http://repozytorium.mati75.eu/raspbian jessie-backports main contrib non-free" | sudo tee --append "/etc/apt/sources.list.d/php7.list"
+    sudo gpg --keyserver pgpkeys.mit.edu --recv-key CCD91D6111A06851
+    sudo gpg --armor --export CCD91D6111A06851 | sudo apt-key add -
+  else
+    # x86 package
+    echo "deb https://packages.dotdeb.org jessie all" | sudo tee --append "/etc/apt/sources.list.d/php7.list"
+    curl http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
+  fi
+
   ynh_package_update
   ynh_package_install apt-transport-https --no-install-recommends
   ynh_package_install php7.0 php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring --no-install-recommends
@@ -191,9 +214,9 @@ ynh_install_php7 () {
 }
 
 ynh_remove_php7 () {
-  sudo rm -f /etc/apt/sources.list.d/dotdeb.list
+  sudo rm -f /etc/apt/sources.list.d/php7.list
   sudo apt-key del 4096R/89DF5277
-  ynh_package_update
+  sudo apt-key del 2048R/11A06851
   ynh_package_remove php7.0 php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring
 }
 
