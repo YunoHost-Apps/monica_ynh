@@ -43,6 +43,10 @@ exec_as() {
   fi
 }
 
+#
+# Composer helpers
+#
+
 # Execute a composer command from a given directory
 # usage: composer_exec AS_USER WORKDIR COMMAND [ARG ...]
 exec_composer() {
@@ -71,9 +75,9 @@ init_composer() {
     || ynh_die "Unable to update monica core dependencies"
 }
 
-#=================================================
-# NODEJS
-#=================================================
+#
+# NodeJS helpers
+#
 
 sudo_path () {
 	sudo env "PATH=$PATH" $@
@@ -157,6 +161,10 @@ ynh_remove_nodejs () {
 		sudo sed --in-place "/NVM_DIR/d" /root/.bashrc
 	fi
 }
+
+#
+# PHP7 helpers
+#
 
 ynh_install_php7 () {
   sudo echo 'deb https://packages.dotdeb.org jessie all' > /etc/apt/sources.list.d/dotdeb.list
