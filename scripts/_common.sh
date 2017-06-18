@@ -195,6 +195,10 @@ ynh_remove_nodejs () {
 #
 
 ynh_install_php7 () {
+
+  ynh_package_update
+  ynh_package_install apt-transport-https --no-install-recommends
+
   architecture=$(uname -m)
   if [ $architecture == "armv7l" ]; then
     # arm package
@@ -208,7 +212,6 @@ ynh_install_php7 () {
   fi
 
   ynh_package_update
-  ynh_package_install apt-transport-https --no-install-recommends
   ynh_package_install php7.0 php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring --no-install-recommends
   sudo update-alternatives --install /usr/bin/php php /usr/bin/php5 70
 }
