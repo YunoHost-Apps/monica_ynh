@@ -42,7 +42,7 @@ sudo sed -i "s/yuno_email/$email/g" ../conf/CreateUser.php
 sudo  cp ../conf/CreateUser.php $final_path/database/seeds/CreateUser.php
 
 # setup application config
-sudo  cp ../conf/.env $final_path/.env
+sudo cp ../conf/.env $final_path/.env
 
 sudo sed -i "s/yunouser/$dbuser/g" $final_path/.env
 sudo sed -i "s/yunopass/$dbpass/g" $final_path/.env
@@ -52,11 +52,11 @@ sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
 # uses commas because path url contains a slash
 sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
 
-exec_composer $final_path update
+sudo exec_composer $final_path update
 
 # setup application config
-cd $final_path && /usr/bin/php7.0 artisan -q migrate --force
-cd $final_path && /usr/bin/php7.0 artisan -q optimize
+cd $final_path && sudo /usr/bin/php7.0 artisan -q migrate --force
+cd $final_path && sudo /usr/bin/php7.0 artisan -q optimize
 
 # Install files and set permissions
 sudo chown -R www-data: "$final_path"
