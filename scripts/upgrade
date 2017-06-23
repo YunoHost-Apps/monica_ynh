@@ -58,8 +58,8 @@ sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
 exec_composer $final_path update
 
 # setup application config
-cd $final_path && sudo /usr/bin/php7.0 artisan -q migrate --force
-cd $final_path && sudo /usr/bin/php7.0 artisan -q optimize
+cd $final_path && sudo /usr/bin/php7.0 artisan migrate --force
+cd $final_path && sudo /usr/bin/php7.0 artisan optimize
 
 # Install files and set permissions
 sudo chown -R www-data: "$final_path"
