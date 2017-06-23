@@ -95,7 +95,7 @@ sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
 sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
 
 # Install nodejs packages
-cd $final_path && sudo_path npm install npm@4 pnpm
+cd $final_path && sudo_path npm install -g npm@4 pnpm
 cd $final_path && sudo_path pnpm install
 cd $final_path && sudo_path pnpm install bower gulp
 cd $final_path && sudo_path bower install -f --allow-root
