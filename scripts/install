@@ -56,7 +56,7 @@ ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
 
 # install nodejs
 ynh_install_nodejs 6.10.3
-ynh_package_install g++ php7.0-curl
+ynh_package_install g++ php7.0-curl php7.0-gd
 
 # extract monica into $final_path
 extract_monica $final_path
