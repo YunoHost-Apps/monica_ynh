@@ -31,6 +31,9 @@ dbpass=$(ynh_app_setting_get "$app" mysqlpwd)
 extract_monica $final_path
 #ynh_setup_source $final_path
 
+# install new dependencies
+ynh_package_install g++ php7.0-curl
+
 # create a user
 first_name=$(ynh_user_get_info $admin 'firstname')
 last_name=$(ynh_user_get_info $admin 'lastname')
