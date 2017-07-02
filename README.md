@@ -14,3 +14,8 @@ Personal Relationship Manager - a new kind of CRM to organize interactions with 
   * This is due to a limitation in monica, not yunohost!
   * See [here](https://github.com/monicahq/monica/issues/139) for the current progress.
 * [x] make root domain redirect to index.php
+
+
+## Notes for Upgrading
+
+* Check for changes in .env
