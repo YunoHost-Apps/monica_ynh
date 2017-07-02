@@ -3,7 +3,7 @@
 #
 
 # monica git version
-VERSION="ffbf92c"
+VERSION="v0.2.1"
 
 # Remote URL to fetch monica source tarball
 MONICA_SOURCE_URL="https://github.com/monicahq/monica/archive/${VERSION}.tar.gz"
@@ -209,12 +209,12 @@ ynh_install_php7 () {
   architecture=$(uname -m)
   if [ $architecture == "armv7l" ]; then
     # arm package
-    echo "deb http://repozytorium.mati75.eu/raspbian jessie-backports main contrib non-free" | sudo tee --append "/etc/apt/sources.list.d/php7.list"
+    echo "deb http://repozytorium.mati75.eu/raspbian jessie-backports main contrib non-free" | sudo tee "/etc/apt/sources.list.d/php7.list"
     sudo gpg --keyserver pgpkeys.mit.edu --recv-key CCD91D6111A06851
     sudo gpg --armor --export CCD91D6111A06851 | sudo apt-key add -
   else
     # x86 package
-    echo "deb https://packages.dotdeb.org jessie all" | sudo tee --append "/etc/apt/sources.list.d/php7.list"
+    echo "deb https://packages.dotdeb.org jessie all" | sudo tee "/etc/apt/sources.list.d/php7.list"
     curl http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
   fi
 
