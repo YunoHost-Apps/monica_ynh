@@ -32,6 +32,7 @@ extract_monica $final_path
 #ynh_setup_source $final_path
 
 # install new dependencies
+ynh_install_php7
 ynh_package_install php7.0 php7.0-zip php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring --no-install-recommends
 
 # create a user
