@@ -219,7 +219,7 @@ ynh_install_php7 () {
   fi
 
   ynh_package_update
-  ynh_package_install php7.0 php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring --no-install-recommends
+  ynh_package_install php7.0 php7.0-zip php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring --no-install-recommends
   sudo update-alternatives --install /usr/bin/php php /usr/bin/php5 70
 }
 
