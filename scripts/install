@@ -41,7 +41,7 @@ sudo mkdir -p $final_path
 sudo chmod 775 $final_path
 
 ynh_install_php7
-ynh_package_install php7.0 php7.0-zip php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring --no-install-recommends
+ynh_package_install php7.0 php7.0-zip php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring php7.0-gd php7.0-curl --no-install-recommends
 
 ### MySQL (can be removed if not used) ###
 # If your app use a MySQL database you can use these lines to bootstrap
