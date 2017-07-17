@@ -3,7 +3,7 @@
 #
 
 # monica git version
-VERSION="v0.3.0"
+VERSION="v0.4.1"
 
 # Remote URL to fetch monica source tarball
 MONICA_SOURCE_URL="https://github.com/monicahq/monica/archive/${VERSION}.tar.gz"
@@ -95,11 +95,11 @@ init_composer() {
   # install composer
   curl -sS https://getcomposer.org/installer \
     | COMPOSER_HOME="${DESTDIR}/.composer" \
-        sudo /usr/bin/php7.0 -- --install-dir="$DESTDIR" \
+        sudo /usr/bin/php7.0 -- --quiet --install-dir="$DESTDIR" \
     || ynh_die "Unable to install Composer"
 
   # update dependencies to create composer.lock
-  exec_composer "$DESTDIR" install --no-dev --prefer-dist \
+  exec_composer "$DESTDIR" install --quiet --no-dev --prefer-dist \
     || ynh_die "Unable to update monica core dependencies"
 }
 
