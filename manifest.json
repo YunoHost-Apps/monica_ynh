@@ -3,7 +3,7 @@
     "id": "monica",
     "packaging_format": 1,
     "description": {
-        "en": " Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family. https://monicahq.com"
+        "en": " Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family."
     },
     "url": "https://monica.com",
     "license": "free",
@@ -18,7 +18,7 @@
     "multi_instance": true,
     "services": [
         "nginx",
-        "php5-fpm",
+        "php7.0-fpm",
         "mysql"
     ],
     "arguments": {
@@ -27,20 +27,20 @@
                 "name": "domain",
                 "type": "domain",
                 "ask": {
-                    "en": "Choose a domain name for ynhmonica",
-                    "fr": "Choisissez un nom de domaine pour ynhmonica"
+                    "en": "Choose a domain name for Monica",
+                    "fr": "Choisissez un nom de domaine pour Monica"
                 },
-                "monica": "monica.com"
+                "example": "monica.com"
             },
             {
                 "name": "path",
                 "type": "path",
                 "ask": {
-                    "en": "Choose a path for ynhmonica",
-                    "fr": "Choisissez un chemin pour ynhmonica"
+                    "en": "Choose a path for Monica. BEWARE: Currently it's only possible to install Monica on the root of a domain, eg. monica.example.com",
+                    "fr": "Attention: Only install Monica on the domain root, e.g. monica.example.com"
                 },
-                "monica": "/monica",
-                "default": "/monica"
+                "example": "/",
+                "default": "/"
             },
             {
                 "name": "admin",
@@ -49,7 +49,7 @@
                     "en": "Choose an admin user",
                     "fr": "Choisissez l’administrateur"
                 },
-                "monica": "johndoe"
+                "example": "johndoe"
             },
             {
                 "name": "is_public",
