@@ -3,7 +3,7 @@
 #
 
 # monica git version
-VERSION="v0.4.2"
+VERSION="v0.5.0"
 
 # Remote URL to fetch monica source tarball
 MONICA_SOURCE_URL="https://github.com/monicahq/monica/archive/${VERSION}.tar.gz"
