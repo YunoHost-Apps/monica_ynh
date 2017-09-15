@@ -1,1 +1,1 @@
-yunohost app install /vagrant/monica_ynh/ --debug -n -a "domain=ynh2.dev&path=/&admin=basti&is_public=0&language=en"
+yunohost app install /vagrant/monica_ynh/ --debug -n -a "domain=monica.ynh.local&path=/&admin=basti&is_public=0&language=en"

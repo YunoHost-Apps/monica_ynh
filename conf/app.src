@@ -1,2 +1,6 @@
-SOURCE_URL=https://github.com/monicahq/monica/archive/cdaea00.tar.gz
-SOURCE_SUM=82e3048e6a1d05a1011c3dc738af344795b48a518d89a79ca746dff0055d3355
+SOURCE_URL=https://github.com/monicahq/monica/archive/v0.6.5.tar.gz
+SOURCE_SUM=23a0812592a7101896da6d4b8c3a18693685ede964c67f2f8dff5f6be9277511
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=tar.gz
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=v0.6.5.tar.gz

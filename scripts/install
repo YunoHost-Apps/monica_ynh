@@ -1,69 +1,116 @@
 #!/bin/bash
 
-# Exit on command errors and treat unset variables as an error
-set -eu
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# This is a multi-instance app, meaning it can be installed several times independently
-# The id of the app as stated in the manifest is available as $YNH_APP_ID
-# The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
-# The app instance name is available as $YNH_APP_INSTANCE_NAME
-#    - the first time the app is installed, YNH_APP_INSTANCE_NAME = monica
-#    - the second time the app is installed, YNH_APP_INSTANCE_NAME = monica__2
-#    - monica__{N} for the subsequent installations, with N=3,4, ...
-# The app instance name is probably what you are interested the most, since this is
-# guaranteed to be unique. This is a good unique identifier to define installation path,
-# db names, ...
-app=$YNH_APP_INSTANCE_NAME
+source _common.sh
+source /usr/share/yunohost/helpers
 
-# Retrieve arguments
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
+
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
 
-# Source YunoHost helpers
-source /usr/share/yunohost/helpers
-source ./_common.sh
+# This is a multi-instance app, meaning it can be installed several times independently
+# The id of the app as stated in the manifest is available as $YNH_APP_ID
+# The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
+# The app instance name is available as $YNH_APP_INSTANCE_NAME
+#    - the first time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample
+#    - the second time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample__2
+#    - ynhexample__{N} for the subsequent installations, with N=3,4, ...
+# The app instance name is probably what you are interested the most, since this is
+# guaranteed to be unique. This is a good unique identifier to define installation path,
+# db names, ...
+app=$YNH_APP_INSTANCE_NAME
 
-# Save app settings
-ynh_app_setting_set "$app" admin "$admin"
-ynh_app_setting_set "$app" is_public "$is_public"
-ynh_app_setting_set "$app" language "$language"
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
 
-# Check domain/path availability
-sudo yunohost app checkurl "${domain}${path_url}" -a "$app" \
-    || ynh_die "Path not available: ${domain}${path_url}"
+# Normalize the url path syntax
+path_url=$(ynh_normalize_url_path $path_url)
 
-# Copy source files
+# Check web path availability
+ynh_webpath_available $domain $path_url
+# Register (book) web path
+ynh_webpath_register $app $domain $path_url
+
 final_path=/var/www/$app
-sudo mkdir -p $final_path
-sudo chmod 775 $final_path
+test ! -e "$final_path" || ynh_die "This path already contains a folder"
+
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app path $path_url
+ynh_app_setting_set $app admin $admin
+ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set $app language $language
+
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
 
 ynh_install_php7
-ynh_package_install php7.0 php7.0-zip php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring php7.0-gd php7.0-curl --no-install-recommends
-
-### MySQL (can be removed if not used) ###
-# If your app use a MySQL database you can use these lines to bootstrap
-# a database, an associated user and save the password in app settings.
-#
-# # Generate MySQL password and create database
-dbuser=$app
-dbname=$app
-dbpass=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d '[A-Za-z0-9]' | sed -n 's/\(.\{24\}\).*/\1/p')
-
-ynh_app_setting_set "$app" mysqlpwd "$dbpass"
-ynh_mysql_create_db "$dbname" "$dbuser" "$dbpass"
-
-# install nodejs
+ynh_package_install php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl
 ynh_install_nodejs 6.10.3
 
-# extract monica into $final_path
-extract_monica $final_path
-#ynh_setup_source $final_path
+#=================================================
+# CREATE A MYSQL DATABASE
+#=================================================
 
-# install composer
+db_name=$(ynh_sanitize_dbid $app)
+ynh_app_setting_set $app db_name $db_name
+ynh_mysql_setup_db $db_name $db_name
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+
+ynh_app_setting_set $app final_path $final_path
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source "$final_path"
+
 init_composer $final_path
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+sudo sed -i "s@YNH_EXAMPLE_PATH@$path_url@g" ../conf/nginx.conf
+sudo sed -i "s@YNH_WWW_PATH@$final_path\/public\/@g" ../conf/nginx.conf
+
+# Create a dedicated nginx config
+ynh_add_nginx_config
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+# Create a system user
+ynh_system_user_create $app
+
+#=================================================
+# SPECIFIC SETUP
+#=================================================
 
 # create a user
 first_name=$(ynh_user_get_info $admin 'firstname')
@@ -75,20 +122,16 @@ sudo sed -i "s/yuno_lastname/$last_name/g" ../conf/CreateUser.php
 sudo sed -i "s/yuno_email/$email/g" ../conf/CreateUser.php
 sudo  cp ../conf/CreateUser.php $final_path/database/seeds/CreateUser.php
 
-# Modify Nginx configuration file and copy it to Nginx conf directory
-nginx_conf=../conf/nginx.conf
-sudo sed -i "s@YNH_EXAMPLE_PATH@$path_url@g" ../conf/nginx.conf
-sudo sed -i "s@YNH_WWW_PATH@$final_path\/public\/@g" $nginx_conf
-sudo cp $nginx_conf /etc/nginx/conf.d/$domain.d/$app.conf
-
 # setup application config
 sudo  cp ../conf/.env $final_path/.env
-cd $final_path && sudo /usr/bin/php7.0 artisan -n key:generate --force
-cd $final_path && sudo /usr/bin/php7.0 artisan config:clear
+cd $final_path && sudo /usr/bin/php7.1 artisan -n key:generate --force
+cd $final_path && sudo /usr/bin/php7.1 artisan config:clear
 
-sudo sed -i "s/yunouser/$dbuser/g" $final_path/.env
-sudo sed -i "s/yunopass/$dbpass/g" $final_path/.env
-sudo sed -i "s/yunobase/$dbname/g" $final_path/.env
+db_name=$(ynh_sanitize_dbid $app)
+
+sudo sed -i "s/yunouser/$db_name/g" $final_path/.env
+sudo sed -i "s/yunopass/$db_pwd/g" $final_path/.env
+sudo sed -i "s/yunobase/$db_name/g" $final_path/.env
 sudo sed -i "s/yunomail/$email/g" $final_path/.env
 sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
 ## uses commas because path url contains a slash
@@ -101,26 +144,44 @@ cd $final_path && sudo_path pnpm install -g bower gulp
 cd $final_path && sudo_path bower install -f --allow-root
 
 # setup application config
-cd $final_path && sudo /usr/bin/php7.0 artisan -q migrate --force
-cd $final_path && sudo /usr/bin/php7.0 artisan -q storage:link
-cd $final_path && sudo /usr/bin/php7.0 artisan -q optimize
-cd $final_path && sudo /usr/bin/php7.0 artisan -q db:seed --class ActivityTypesTableSeeder --force
-cd $final_path && sudo /usr/bin/php7.0 artisan -q db:seed --class CountriesSeederTable --force
-cd $final_path && sudo /usr/bin/php7.0 artisan -q db:seed --class CreateUser --force
+cd $final_path && sudo /usr/bin/php7.1 artisan -q migrate --force
+cd $final_path && sudo /usr/bin/php7.1 artisan -q storage:link
+cd $final_path && sudo /usr/bin/php7.1 artisan -q optimize
+cd $final_path && sudo /usr/bin/php7.1 artisan -q db:seed --class ActivityTypesTableSeeder --force
+cd $final_path && sudo /usr/bin/php7.1 artisan -q db:seed --class CountriesSeederTable --force
+cd $final_path && sudo /usr/bin/php7.1 artisan -q db:seed --class CreateUser --force
 
 # create a cronjob to run the scheduler
-echo "* * * * * www-data cd $final_path && /usr/bin/php7.0 $final_path/artisan schedule:run >/dev/null 2>&1" > /tmp/cron$app
+echo "* * * * * www-data cd $final_path && /usr/bin/php7.1 $final_path/artisan schedule:run >/dev/null 2>&1" > /tmp/cron$app
 sudo mv /tmp/cron$app /etc/cron.d/$app
 sudo chown root /etc/cron.d/$app
 
-# Install files and set permissions
-sudo chown -R www-data: "$final_path"
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
 
-# If app is public, add url to SSOWat conf as skipped_uris
-if [[ $is_public -eq 1 ]]; then
-  # unprotected_uris allows SSO credentials to be passed anyway.
-  ynh_app_setting_set "$app" unprotected_uris "/"
+# Set permissions to app files
+chown -R www-data: $final_path
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+
+if [ $is_public -eq 0 ]
+then	# Remove the public access
+	ynh_app_setting_delete $app skipped_uris
+fi
+# Make app public if necessary
+if [ $is_public -eq 1 ]
+then
+	# unprotected_uris allows SSO credentials to be passed anyway.
+	ynh_app_setting_set $app unprotected_uris "/"
 fi
 
-# Reload services
-sudo service nginx reload
+#=================================================
+# RELOAD NGINX
+#=================================================
+
+systemctl reload nginx

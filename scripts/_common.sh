@@ -1,59 +1,113 @@
+#!/bin/bash
+
+# =============================================================================
+#                     YUNOHOST 2.7 FORTHCOMING HELPERS
+# =============================================================================
+
+# Create a dedicated nginx config
 #
-# Common variables
-#
+# usage: ynh_add_nginx_config
+ynh_add_nginx_config () {
+	finalnginxconf="/etc/nginx/conf.d/$domain.d/$app.conf"
+	ynh_backup_if_checksum_is_different "$finalnginxconf"
+	sudo cp ../conf/nginx.conf "$finalnginxconf"
 
-# monica git version
-VERSION="v0.6.5"
+	# To avoid a break by set -u, use a void substitution ${var:-}. If the variable is not set, it's simply set with an empty variable.
+	# Substitute in a nginx config file only if the variable is not empty
+	if test -n "${path_url:-}"; then
+		ynh_replace_string "__PATH__" "$path_url" "$finalnginxconf"
+	fi
+	if test -n "${domain:-}"; then
+		ynh_replace_string "__DOMAIN__" "$domain" "$finalnginxconf"
+	fi
+	if test -n "${port:-}"; then
+		ynh_replace_string "__PORT__" "$port" "$finalnginxconf"
+	fi
+	if test -n "${app:-}"; then
+		ynh_replace_string "__NAME__" "$app" "$finalnginxconf"
+	fi
+	if test -n "${final_path:-}"; then
+		ynh_replace_string "__FINALPATH__" "$final_path" "$finalnginxconf"
+	fi
+	ynh_store_file_checksum "$finalnginxconf"
 
-# Remote URL to fetch monica source tarball
-MONICA_SOURCE_URL="https://github.com/monicahq/monica/archive/${VERSION}.tar.gz"
-
-# App package root directory should be the parent folder
-PKGDIR=$(cd ../; pwd)
-
-#
-# Common helpers
-#
-
-# Download and extract monica sources to the given directory
-# usage: extract_monica_to DESTDIR
-extract_monica() {
-  local DESTDIR=$1
-
-  # retrieve and extract monica tarball
-  rc_tarball="${DESTDIR}/monica.tar.gz"
-  sudo wget -q -O "$rc_tarball" "$MONICA_SOURCE_URL" \
-    || ynh_die "Unable to download monica tarball"
-  sudo tar xf "$rc_tarball" -C "$DESTDIR" --strip-components 1 \
-    || ynh_die "Unable to extract monica tarball"
-  sudo rm "$rc_tarball"
+	sudo systemctl reload nginx
 }
 
-# Remove a file or a directory securely
+# Remove the dedicated nginx config
 #
-# usage: ynh_secure_remove path_to_remove
-# | arg: path_to_remove - File or directory to remove
-ynh_secure_remove () {
-	path_to_remove=$1
-	forbidden_path=" \
-	/var/www \
-	/home/yunohost.app"
+# usage: ynh_remove_nginx_config
+ynh_remove_nginx_config () {
+	ynh_secure_remove "/etc/nginx/conf.d/$domain.d/$app.conf"
+	sudo systemctl reload nginx
+}
 
-	if [[ "$forbidden_path" =~ "$path_to_remove" \
-		# Match all paths or subpaths in $forbidden_path
-		|| "$path_to_remove" =~ ^/[[:alnum:]]+$ \
-		# Match all first level paths from / (Like /var, /root, etc...)
-		|| "${path_to_remove:${#path_to_remove}-1}" = "/" ]]
-		# Match if the path finishes by /. Because it seems there is an empty variable
+# Create a dedicated php-fpm config
+#
+# usage: ynh_add_fpm_config
+ynh_add_fpm_config () {
+	finalphpconf="/etc/php5/fpm/pool.d/$app.conf"
+	ynh_backup_if_checksum_is_different "$finalphpconf"
+	sudo cp ../conf/php-fpm.conf "$finalphpconf"
+	ynh_replace_string "__NAMETOCHANGE__" "$app" "$finalphpconf"
+	ynh_replace_string "__FINALPATH__" "$final_path" "$finalphpconf"
+	ynh_replace_string "__USER__" "$app" "$finalphpconf"
+	sudo chown root: "$finalphpconf"
+	ynh_store_file_checksum "$finalphpconf"
+
+	if [ -e "../conf/php-fpm.ini" ]
 	then
-		echo "Avoid deleting $path_to_remove." >&2
-	else
-		if [ -e "$path_to_remove" ]
-		then
-			sudo rm -R "$path_to_remove"
-		else
-			echo "$path_to_remove wasn't deleted because it doesn't exist." >&2
-		fi
+		finalphpini="/etc/php5/fpm/conf.d/20-$app.ini"
+		ynh_backup_if_checksum_is_different "$finalphpini"
+		sudo cp ../conf/php-fpm.ini "$finalphpini"
+		sudo chown root: "$finalphpini"
+		ynh_store_file_checksum "$finalphpini"
+	fi
+
+	sudo systemctl reload php5-fpm
+}
+
+# Remove the dedicated php-fpm config
+#
+# usage: ynh_remove_fpm_config
+ynh_remove_fpm_config () {
+	ynh_secure_remove "/etc/php5/fpm/pool.d/$app.conf"
+	ynh_secure_remove "/etc/php5/fpm/conf.d/20-$app.ini" 2>&1
+	sudo systemctl reload php5-fpm
+}
+
+# Create a dedicated systemd config
+#
+# usage: ynh_add_systemd_config
+ynh_add_systemd_config () {
+	finalsystemdconf="/etc/systemd/system/$app.service"
+	ynh_backup_if_checksum_is_different "$finalsystemdconf"
+	sudo cp ../conf/systemd.service "$finalsystemdconf"
+
+	# To avoid a break by set -u, use a void substitution ${var:-}. If the variable is not set, it's simply set with an empty variable.
+	# Substitute in a nginx config file only if the variable is not empty
+	if test -n "${final_path:-}"; then
+		ynh_replace_string "__FINALPATH__" "$final_path" "$finalsystemdconf"
+	fi
+	if test -n "${app:-}"; then
+		ynh_replace_string "__APP__" "$app" "$finalsystemdconf"
+	fi
+	ynh_store_file_checksum "$finalsystemdconf"
+
+	sudo chown root: "$finalsystemdconf"
+	sudo systemctl enable $app
+	sudo systemctl daemon-reload
+}
+
+# Remove the dedicated systemd config
+#
+# usage: ynh_remove_systemd_config
+ynh_remove_systemd_config () {
+	finalsystemdconf="/etc/systemd/system/$app.service"
+	if [ -e "$finalsystemdconf" ]; then
+		sudo systemctl stop $app
+		sudo systemctl disable $app
+		ynh_secure_remove "$finalsystemdconf"
 	fi
 }
 
@@ -82,7 +136,7 @@ exec_composer() {
   shift 1
 
   COMPOSER_HOME="${WORKDIR}/.composer" \
-    sudo /usr/bin/php7.0 "${WORKDIR}/composer.phar" $@ \
+    sudo /usr/bin/php7.1 "${WORKDIR}/composer.phar" $@ \
       -d "${WORKDIR}" --quiet --no-interaction
 }
 
@@ -95,7 +149,7 @@ init_composer() {
   # install composer
   curl -sS https://getcomposer.org/installer \
     | COMPOSER_HOME="${DESTDIR}/.composer" \
-        sudo /usr/bin/php7.0 -- --quiet --install-dir="$DESTDIR" \
+        sudo /usr/bin/php7.1 -- --quiet --install-dir="$DESTDIR" \
     || ynh_die "Unable to install Composer"
 
   # update dependencies to create composer.lock
@@ -206,20 +260,11 @@ ynh_install_php7 () {
   ynh_package_update
   ynh_package_install apt-transport-https --no-install-recommends
 
-  architecture=$(uname -m)
-  if [ $architecture == "armv7l" ]; then
-    # arm package
-    echo "deb http://repozytorium.mati75.eu/raspbian jessie-backports main contrib non-free" | sudo tee "/etc/apt/sources.list.d/php7.list"
-    sudo gpg --keyserver pgpkeys.mit.edu --recv-key CCD91D6111A06851
-    sudo gpg --armor --export CCD91D6111A06851 | sudo apt-key add -
-  else
-    # x86 package
-    echo "deb https://packages.dotdeb.org jessie all" | sudo tee "/etc/apt/sources.list.d/php7.list"
-    curl http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
-  fi
+  wget -q -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+  echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php7.list
 
   ynh_package_update
-  ynh_package_install php7.0 --no-install-recommends
+  ynh_package_install php7.1 --no-install-recommends
   sudo update-alternatives --install /usr/bin/php php /usr/bin/php5 70
 }
 
@@ -227,6 +272,6 @@ ynh_remove_php7 () {
   sudo rm -f /etc/apt/sources.list.d/php7.list
   sudo apt-key del 4096R/89DF5277
   sudo apt-key del 2048R/11A06851
-  ynh_package_remove php7.0 php7.0-fpm php7.0-mysql php7.0-xml php7.0-intl php7.0-mbstring
+  ynh_package_remove php7.1 php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring
 }
 

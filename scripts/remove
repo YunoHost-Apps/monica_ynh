@@ -1,37 +1,78 @@
 #!/bin/bash
 
-set -u
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# See comments in install script
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
 app=$YNH_APP_INSTANCE_NAME
 
-# Source YunoHost helpers
-source /usr/share/yunohost/helpers
-source ./_common.sh
+domain=$(ynh_app_setting_get $app domain)
+port=$(ynh_app_setting_get $app port)
+db_name=$(ynh_app_setting_get $app db_name)
 
-# Retrieve app settings
-domain=$(ynh_app_setting_get "$app" domain)
+#=================================================
+# STANDARD REMOVE
+#=================================================
+# REMOVE SERVICE FROM ADMIN PANEL
+#=================================================
 
-# Remove sources
-sudo rm -rf /var/www/$app
+if yunohost service status | grep -q $app
+then
+	echo "Remove $app service"
+	yunohost service remove $app
+fi
 
-# Remove nginx configuration file
-sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
 
-# Remove cronjob
-sudo rm -f /etc/cron.d/$app
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
 
-# Remove PHP7.0
-ynh_remove_php7
+#=================================================
+# REMOVE THE MYSQL DATABASE
+#=================================================
 
-# Remove NodeJS
-ynh_remove_nodejs
+# Remove a database if it exists, along with the associated user
+ynh_mysql_remove_db $db_name $db_name
 
-# Remove mysql user and database
-dbname=$app
-dbuser=$app
-ynh_mysql_drop_db "$dbname" || true
-ynh_mysql_drop_user "$dbuser" || true
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
 
-# Reload nginx service
-sudo service nginx reload
+# Remove the app directory securely
+ynh_secure_remove "/var/www/$app"
+
+#=================================================
+# REMOVE NGINX CONFIGURATION
+#=================================================
+
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
+
+#=================================================
+# SPECIFIC REMOVE
+#=================================================
+# REMOVE THE CRON FILE
+#=================================================
+
+# Remove a cron file
+ynh_secure_remove "/etc/cron.d/$app"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# REMOVE DEDICATED USER
+#=================================================
+
+# Delete a system user
+ynh_system_user_delete $app
