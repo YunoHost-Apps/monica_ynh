@@ -3,20 +3,23 @@
 
 # Move this file from check_process.default to check_process when you have filled it.
 
-;; Test complet
+;; Test complete
 	; Manifest
 		domain="domain.tld"	(DOMAIN)
 		path="/path"	(PATH)
 		admin="john"	(USER)
 		language="fr"
 		is_public=1	(PUBLIC|public=1|private=0)
-  	password="pass"
-  	port="666"	(PORT)
+		admin_name="john"   (USER)
+		admin_pass="08jtiig45f88r7"    (PASSWORD)
+        admin_email="abc@example.com"
+       	password="pass"
+     	port="666"	(PORT)
 	; Checks
 		pkg_linter=1
-		setup_sub_dir=1
+		setup_sub_dir=0
 		setup_root=1
-		setup_nourl=0
+		setup_nourl=1
 		setup_private=1
 		setup_public=1
 		upgrade=1
@@ -39,5 +42,5 @@
 	Level 9=0
 	Level 10=0
 ;;; Options
-Email=
-Notification=none
+Email=yunohost@gumpri.ch
+Notification=all
