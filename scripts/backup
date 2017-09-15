@@ -6,8 +6,8 @@
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-# Exit on command errors and treat access to unset variables as an error
-set -eu
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
 #=================================================
 # IMPORT GENERIC HELPERS
