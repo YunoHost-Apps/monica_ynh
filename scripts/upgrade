@@ -120,12 +120,6 @@ exec_composer "$final_path" update --quiet --no-dev --prefer-dist \
 cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
 cd $final_path && sudo /usr/bin/php7.1 artisan optimize
 
-
-# Verify the checksum and backup the file if it's different
-ynh_backup_if_checksum_is_different "$final_path/CONFIG_FILE"
-# Recalculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$final_path/CONFIG_FILE"
-
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
