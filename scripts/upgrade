@@ -113,8 +113,7 @@ sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
 ## uses commas because path url contains a slash
 sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
 
-exec_composer "$final_path" update --quiet --no-dev --prefer-dist \
-  || ynh_die "Unable to update monica core dependencies"
+exec_composer "$final_path" update --quiet --no-dev --prefer-dist
 
 # setup application config
 cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force

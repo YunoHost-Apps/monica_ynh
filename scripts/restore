@@ -10,6 +10,15 @@
 ynh_abort_if_errors
 
 #=================================================
+# CHECK IF THE APP CAN BE RESTORED
+#=================================================
+
+yunohost app checkurl "${domain}${path_url}" -a "$app" \
+    || ynh_die "Path not available: ${domain}${path_url}"
+test ! -d $final_path \
+    || ynh_die "There is already a directory: $final_path "
+
+#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -31,15 +40,6 @@ domain=$(ynh_app_setting_get $app domain)
 path_url=$(ynh_app_setting_get $app path)
 final_path=$(ynh_app_setting_get $app final_path)
 db_name=$(ynh_app_setting_get $app db_name)
-
-#=================================================
-# CHECK IF THE APP CAN BE RESTORED
-#=================================================
-
-yunohost app checkurl "${domain}${path_url}" -a "$app" \
-	|| ynh_die "Path not available: ${domain}${path_url}"
-test ! -d $final_path \
-	|| ynh_die "There is already a directory: $final_path "
 
 #=================================================
 # STANDARD RESTORATION STEPS
@@ -71,20 +71,6 @@ ynh_mysql_connect_as $db_name $db_pwd $db_name < ./db.sql
 ynh_system_user_create $app
 
 #=================================================
-# RESTORE USER RIGHTS
-#=================================================
-
-# Restore permissions on app files
-chown -R www-data: $final_path
-
-#=================================================
-# RESTORE THE PHP-FPM CONFIGURATION
-#=================================================
-
-#ynh_restore_file "/etc/php5/fpm/pool.d/$app.conf"
-#ynh_restore_file "/etc/php5/fpm/conf.d/20-$app.ini"
-
-#=================================================
 # SPECIFIC RESTORATION
 #=================================================
 # REINSTALL DEPENDENCIES
@@ -102,6 +88,11 @@ cd $final_path && sudo_path pnpm install
 cd $final_path && sudo_path pnpm install -g bower gulp
 cd $final_path && sudo_path bower install -f --allow-root
 
+#=================================================
+# RESTORE USER RIGHTS
+#=================================================
+
+# Restore permissions on app files
 chown -R www-data: $final_path
 
 #=================================================
