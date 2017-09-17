@@ -19,3 +19,7 @@ Personal Relationship Manager - a new kind of CRM to organize interactions with 
 ## Notes for Upgrading
 
 * Check for changes in .env
+
+## License
+
+GPL-3.0

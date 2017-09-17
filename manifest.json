@@ -6,19 +6,19 @@
         "en": " Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family."
     },
     "url": "https://monica.com",
-    "license": "free",
+    "license": "GPL-3.0",
+    "version": "1.0",
     "maintainer": {
         "name": "Sebastian Gumprich",
         "email": "yunohost@gumpri.ch",
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">> 2.4.0"
+        "yunohost": ">> 2.7.0"
     },
     "multi_instance": true,
     "services": [
         "nginx",
-        "php7.1-fpm",
         "mysql"
     ],
     "arguments": {
@@ -36,11 +36,12 @@
                 "name": "path",
                 "type": "path",
                 "ask": {
-                    "en": "Choose a path for Monica. BEWARE: Currently it's only possible to install Monica on the root of a domain, eg. monica.example.com",
+                    "en": "Currently it's only possible to install Monica on the root of a domain, eg. monica.example.com",
                     "fr": "Attention: Only install Monica on the domain root, e.g. monica.example.com"
                 },
                 "example": "/",
-                "default": "/"
+                "default": "/",
+				"choices": ["/"]
             },
             {
                 "name": "admin",
