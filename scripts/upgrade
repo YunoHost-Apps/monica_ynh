@@ -87,8 +87,7 @@ ynh_system_user_create $app
 #=================================================
 
 # install new dependencies
-ynh_install_php7
-ynh_package_install php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring --no-install-recommends
+ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl
 
 # create a user
 first_name=$(ynh_user_get_info $admin 'firstname')

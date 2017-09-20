@@ -70,7 +70,6 @@ ynh_app_setting_set $app language $language
 #=================================================
 
 ynh_install_php7
-ynh_package_install php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl
 ynh_install_nodejs 6.10.3
 
 #=================================================
