@@ -1,3 +1,7 @@
+# Unmaintained
+
+This project is unmaintained. If anyone wants to take over, please open an issue!
+
 # Monica app for YunoHost
 
 - [Yunohost project](https://yunohost.org)
