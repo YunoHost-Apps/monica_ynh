@@ -2,7 +2,7 @@
 # Monica app for YunoHost
 [![Installer Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=monica)
 
-**Shipped version:** 2.0.1
+**Shipped version:** v2.1.1
 <p align="center"><img src="37693034-5783b3d6-2c93-11e8-80ea-bd78438dcd51.png"></p>
 <h1 align="center">Personal Relationship Manager</h1>
 

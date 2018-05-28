@@ -7,7 +7,7 @@
     },
     "url": "https://monica.com",
     "license": "GPL-3.0",
-    "version": "2.0",
+    "version": "v2.1.1",
     "maintainer": {
         "name": "Sebastian Gumprich",
         "email": "yunohost@gumpri.ch",
