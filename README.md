@@ -1,28 +1,44 @@
-# Unmaintained
-
-This project is unmaintained. If anyone wants to take over, please open an issue!
 
 # Monica app for YunoHost
+[![Installer Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=monica)
+
+**Shipped version:** 2.0.1
+<p align="center"><img src="37693034-5783b3d6-2c93-11e8-80ea-bd78438dcd51.png"></p>
+<h1 align="center">Personal Relationship Manager</h1>
+
 
 - [Yunohost project](https://yunohost.org)
 - [Monica](https://monicahq.com/)
+- [Monica source code at Github](https://github.com/monicahq/monica)
 
-Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family.
+## Introduction
 
-## TODO
+Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
+## Install
+##### This app will install PHP7.1 
+```
+ sudo yunohost app install https://github.com/YunoHost-Apps/monica_ynh
+```
+**First User Registraion:** Visit the app **domain** after the installtion is complete to register as **first user**. After the first user is registerd the registration will be **locked**. You can open the register for all by chaning the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
+
+## Updae
+```
+ sudo yunohost app upgrade -u https://github.com/YunoHost-Apps/monica_ynh monica
+```
+#### Change the settigs of the app by changing the values in .env
+
+## What works ?
+* [X] Update and remove script
+* [X] Upgrade script
+* [X] Backup and restore script (**Need testing**)
+* [X] Multi-instance (**Need testing**)
+* [x] make root domain redirect to index.php
 * [ ] LDAP/SSO support
-  * As for now, the specified admin user with the password `admin` is created in monica
 * [ ] Make monica installable into subdirectory (eg. https://example.com/monica/)
   * Currently it is only possible to install monica into the root of a domain (eg. https://example.com/)
   * This is due to a limitation in monica, not yunohost!
   * See [here](https://github.com/monicahq/monica/issues/139) for the current progress.
-* [x] make root domain redirect to index.php
-
-
-## Notes for Upgrading
-
-* Check for changes in .env
 
 ## License
 
