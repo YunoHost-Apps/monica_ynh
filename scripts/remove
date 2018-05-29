@@ -16,21 +16,10 @@ source /usr/share/yunohost/helpers
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-port=$(ynh_app_setting_get $app port)
 db_name=$(ynh_app_setting_get $app db_name)
 
 #=================================================
 # STANDARD REMOVE
-#=================================================
-# REMOVE SERVICE FROM ADMIN PANEL
-#=================================================
-
-if yunohost service status | grep -q $app
-then
-	echo "Remove $app service"
-	yunohost service remove $app
-fi
-
 #=================================================
 # REMOVE DEPENDENCIES
 #=================================================
@@ -58,6 +47,14 @@ ynh_secure_remove "/var/www/$app"
 
 # Remove the dedicated nginx config
 ynh_remove_nginx_config
+
+#=================================================
+# REMOVE PHP-FPM 7.1 CONFIGURATION
+#=================================================
+
+# Remove the dedicated php-fpm7.1 config
+ynh_remove_fpm7.1_config
+
 
 #=================================================
 # SPECIFIC REMOVE

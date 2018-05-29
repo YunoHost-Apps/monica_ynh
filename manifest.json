@@ -7,18 +7,19 @@
     },
     "url": "https://monica.com",
     "license": "GPL-3.0",
-    "version": "2.0",
+    "version": "2.1.1",
     "maintainer": {
         "name": "Sebastian Gumprich",
         "email": "yunohost@gumpri.ch",
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">> 2.7.0"
+        "yunohost": ">> 2.7.2"
     },
     "multi_instance": true,
     "services": [
         "nginx",
+        "php7.1",
         "mysql"
     ],
     "arguments": {
@@ -31,17 +32,6 @@
                     "fr": "Choisissez un nom de domaine pour Monica"
                 },
                 "example": "monica.com"
-            },
-            {
-                "name": "path",
-                "type": "path",
-                "ask": {
-                    "en": "Currently it's only possible to install Monica on the root of a domain, eg. monica.example.com",
-                    "fr": "Attention: Only install Monica on the domain root, e.g. monica.example.com"
-                },
-                "example": "/",
-                "default": "/",
-				"choices": ["/"]
             },
             {
                 "name": "admin",
@@ -59,7 +49,7 @@
                     "en": "Is it a public application?",
                     "fr": "Est-ce une application publique ?"
                 },
-                "default": false
+                "default": true
             },
             {
                 "name": "language",
@@ -67,7 +57,7 @@
                     "en": "Choose the application language",
                     "fr": "Choisissez la langue de l'application"
                 },
-                "choices": ["fr", "en"],
+                "choices": ["cs","de","en","es","fr","he","it","nl","pt","ru","zh"],
                 "default": "en"
             }
         ]

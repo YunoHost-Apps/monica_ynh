@@ -27,9 +27,8 @@ path_url=$(ynh_app_setting_get $app path)
 admin=$(ynh_app_setting_get $app admin)
 is_public=$(ynh_app_setting_get $app is_public)
 final_path=$(ynh_app_setting_get $app final_path)
-port=$(ynh_app_setting_get $app port)
 db_name=$(ynh_app_setting_get $app db_name)
-
+language=$(ynh_app_setting_get $app language)
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -67,9 +66,6 @@ ynh_setup_source "$final_path"
 # NGINX CONFIGURATION
 #=================================================
 
-sudo sed -i "s@YNH_EXAMPLE_PATH@$path_url@g" ../conf/nginx.conf
-sudo sed -i "s@YNH_WWW_PATH@$final_path\/public\/@g" ../conf/nginx.conf
-
 # Create a dedicated nginx config
 ynh_add_nginx_config
 
@@ -80,6 +76,7 @@ ynh_add_nginx_config
 # Create a system user
 ynh_system_user_create $app
 
+
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
@@ -89,15 +86,16 @@ ynh_system_user_create $app
 # install new dependencies
 ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl
 
-# create a user
-first_name=$(ynh_user_get_info $admin 'firstname')
-last_name=$(ynh_user_get_info $admin 'lastname')
-email=$(ynh_user_get_info $admin 'mail')
+#=================================================
+# PHP-FPM 7.1 CONFIGURATION
+#=================================================
 
-sudo sed -i "s/yuno_firstname/$first_name/g"  ../conf/CreateUser.php
-sudo sed -i "s/yuno_lastname/$last_name/g" ../conf/CreateUser.php
-sudo sed -i "s/yuno_email/$email/g" ../conf/CreateUser.php
-sudo  cp ../conf/CreateUser.php $final_path/database/seeds/CreateUser.php
+# Create a dedicated php-fpm7.1 config
+ynh_add_fpm7.1_config
+
+
+# create a user
+email=$(ynh_user_get_info $admin 'mail')
 
 # setup application config
 sudo cp ../conf/.env $final_path/.env
@@ -109,14 +107,12 @@ sudo sed -i "s/yunopass/$db_pwd/g" $final_path/.env
 sudo sed -i "s/yunobase/$db_name/g" $final_path/.env
 sudo sed -i "s/yunomail/$email/g" $final_path/.env
 sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
-## uses commas because path url contains a slash
-sudo sed -i "s,yunopath,${path_url},g" $final_path/.env
+sudo sed -i "s/language/$language/g" $final_path/.env
 
 exec_composer "$final_path" update --quiet --no-dev --prefer-dist
 
 # setup application config
 cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
-cd $final_path && sudo /usr/bin/php7.1 artisan optimize
 
 #=================================================
 # GENERIC FINALIZATION
@@ -125,7 +121,7 @@ cd $final_path && sudo /usr/bin/php7.1 artisan optimize
 #=================================================
 
 # Set right permissions for curl installation
-chown -R www-data: $final_path
+chown -R $app: $final_path
 
 #=================================================
 # SETUP SSOWAT
