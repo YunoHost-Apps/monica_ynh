@@ -141,8 +141,6 @@ cd $final_path && sudo_path npm run production
 # setup application config
 cd $final_path && sudo /usr/bin/php7.1 artisan -q migrate --force
 cd $final_path && sudo /usr/bin/php7.1 artisan -q storage:link
-cd $final_path && sudo /usr/bin/php7.1 artisan -q db:seed --class ActivityTypesTableSeeder --force
-cd $final_path && sudo /usr/bin/php7.1 artisan -q db:seed --class CountriesSeederTable --force
 cd $final_path && sudo /usr/bin/php7.1 artisan -q setup:production --force
 
 
