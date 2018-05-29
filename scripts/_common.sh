@@ -109,7 +109,7 @@ ynh_install_php7 () {
   echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php7.list
 
   ynh_package_update
-  ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl
+  ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl php7.1-bcmath
   sudo update-alternatives --install /usr/bin/php php /usr/bin/php5 70
 }
 
@@ -117,5 +117,5 @@ ynh_remove_php7 () {
   sudo rm -f /etc/apt/sources.list.d/php7.list
   sudo apt-key del 4096R/89DF5277
   sudo apt-key del 2048R/11A06851
-  ynh_remove_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl
+  ynh_remove_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl php7.1-bcmath
 }
