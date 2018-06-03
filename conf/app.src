@@ -1,6 +1,6 @@
-SOURCE_URL=https://github.com/monicahq/monica/archive/v2.1.1.tar.gz
-SOURCE_SUM=be470d407c19854f08c1f8ff12829df0d36945a7923d78039abc63650105ac71
+SOURCE_URL=https://github.com/monicahq/monica/archive/v2.2.1.tar.gz
+SOURCE_SUM=6188cf762b980a70b530d11dadaa503f0d1a75299f441d745c9cc950238040f2
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=v2.1.1.tar.gz
+SOURCE_FILENAME=v2.2.1.tar.gz
