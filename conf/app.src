@@ -1,6 +1,6 @@
-SOURCE_URL=https://github.com/monicahq/monica/archive/v2.2.1.tar.gz
-SOURCE_SUM=6188cf762b980a70b530d11dadaa503f0d1a75299f441d745c9cc950238040f2
+SOURCE_URL=https://github.com/monicahq/monica/archive/fix/migration-utf8mb4-1442.zip
+SOURCE_SUM=be6d73a602f7d3814c05191c8366f33954740aacb0ae36bcfa05e03bbe9bc224
 SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=tar.gz
+SOURCE_FORMAT=zip
 SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=v2.2.1.tar.gz
+SOURCE_FILENAME=migration-utf8mb4-1442.zip
