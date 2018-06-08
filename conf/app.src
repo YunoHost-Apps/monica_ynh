@@ -1,5 +1,5 @@
 SOURCE_URL=https://github.com/monicahq/monica/archive/fix/migration-utf8mb4-1442.zip
-SOURCE_SUM=be6d73a602f7d3814c05191c8366f33954740aacb0ae36bcfa05e03bbe9bc224
+SOURCE_SUM=4a5dbdb7e54b269400e49db67e31a444e6b0dfe8b261e2e35f25759ec13abcc4
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=zip
 SOURCE_IN_SUBDIR=true
