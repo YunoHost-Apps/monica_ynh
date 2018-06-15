@@ -24,13 +24,13 @@ Monica is an open-source web application to organize the interactions with your 
 ```
 **First User Registraion:** Visit the app **domain** after the installtion is complete to register as **first user**. After the first user is registerd the registration will be **locked**. You can open the register for all by chaning the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
 
-## Updae
+## Update
 ```
  sudo yunohost app upgrade -u https://github.com/YunoHost-Apps/monica_ynh monica
 ```
-#### Change the settigs of the app by changing the values in .env
+#### Change the settings of the app by changing the values in .env
 
-## What works ?
+## What works?
 * [X] Update and remove script
 * [X] Upgrade script
 * [X] Backup and restore script (**Need testing**)
