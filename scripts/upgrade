@@ -21,7 +21,10 @@ admin=$(ynh_app_setting_get $app admin)
 is_public=$(ynh_app_setting_get $app is_public)
 final_path=$(ynh_app_setting_get $app final_path)
 db_name=$(ynh_app_setting_get $app db_name)
+db_pwd=$(ynh_app_setting_get $app mysqlpwd)
 language=$(ynh_app_setting_get $app language)
+random_key=$(ynh_app_setting_get $app random_key)
+
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -63,15 +66,9 @@ path_url=$(ynh_normalize_url_path $path_url)
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-# Create a temporary directory
-tmpdir="$(mktemp -d)"
-cp -a "$final_path/.env" "$tmpdir/.env"
+
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
-cp -a "$tmpdir/.env" "$final_path/.env"
-#remove tmp dir
-sudo rm -Rf "$tmpdir"
-
 
 #=================================================
 # NGINX CONFIGURATION
@@ -103,6 +100,20 @@ ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xm
 ynh_add_fpm7.1_config
 
 # setup application config
+# Get admin email
+email=$(ynh_user_get_info $admin 'mail')
+sudo  cp ../conf/.env $final_path/.env
+
+db_name=$(ynh_sanitize_dbid $app)
+
+ynh_replace_string  "random_key" "$random_key" "$final_path/.env"
+ynh_replace_string  "yunouser"   "$db_name"    "$final_path/.env"
+ynh_replace_string  "yunopass"   "$db_pwd"     "$final_path/.env"
+ynh_replace_string  "yunobase"   "$db_name"    "$final_path/.env"
+ynh_replace_string  "yunomail"   "$email"      "$final_path/.env"
+ynh_replace_string  "yunodomain" "$domain"     "$final_path/.env"
+ynh_replace_string  "language"   "$language"   "$final_path/.env"
+
 cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
 
 #=================================================
