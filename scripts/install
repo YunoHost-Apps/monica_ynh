@@ -145,9 +145,8 @@ cd $final_path && sudo /usr/bin/php7.1 artisan -q setup:production --force
 
 
 # create a cronjob to run the scheduler
-echo "* * * * * sudo $app /usr/bin/php7.1 $final_path/artisan schedule:run" > /tmp/cron$app
+echo "* * * * * -u $app /usr/bin/php7.1 $final_path/artisan schedule:run" > /tmp/cron$app
 sudo mv /tmp/cron$app /etc/cron.d/$app
-sudo chown root /etc/cron.d/$app
 
 #=================================================
 # GENERIC FINALIZATION
@@ -157,6 +156,13 @@ sudo chown root /etc/cron.d/$app
 
 # Set permissions to app files
 chown -R $app: $final_path
+
+#=================================================
+# STORE THE CHECKSUM OF THE CONFIG FILE
+#=================================================
+
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum "$final_path/.env"
 
 #=================================================
 # SETUP SSOWAT
@@ -176,5 +182,5 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-
+systemctl reload php7.1-fpm
 systemctl reload nginx

@@ -10,13 +10,6 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
 # LOAD SETTINGS
 #=================================================
 
@@ -45,6 +38,18 @@ if [ -z $db_name ]; then	# If db_name doesn't exist, create it
 	db_name=$(ynh_sanitize_dbid $app)
 	ynh_app_setting_set $app db_name $db_name
 fi
+#=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+
+# Backup the current version of the app
+ynh_backup_before_upgrade
+ynh_clean_setup () {
+	# restore it if the upgrade fails
+	ynh_restore_upgradebackup
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
 #=================================================
 # CHECK THE PATH
@@ -58,9 +63,15 @@ path_url=$(ynh_normalize_url_path $path_url)
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-
+# Create a temporary directory
+tmpdir="$(mktemp -d)"
+cp -a "$final_path/.env" "$tmpdir/.env"
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
+cp -a "$tmpdir/.env" "$final_path/.env"
+#remove tmp dir
+sudo rm -Rf "$tmpdir"
+
 
 #=================================================
 # NGINX CONFIGURATION
@@ -80,8 +91,6 @@ ynh_system_user_create $app
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
-# ...
-#=================================================
 
 # install new dependencies
 ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl php7.1-bcmath
@@ -92,24 +101,6 @@ ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xm
 
 # Create a dedicated php-fpm7.1 config
 ynh_add_fpm7.1_config
-
-
-# create a user
-email=$(ynh_user_get_info $admin 'mail')
-
-# setup application config
-sudo cp ../conf/.env $final_path/.env
-
-db_name=$(ynh_sanitize_dbid $app)
-db_pwd=$(ynh_app_setting_get $app mysqlpwd)
-sudo sed -i "s/yunouser/$db_name/g" $final_path/.env
-sudo sed -i "s/yunopass/$db_pwd/g" $final_path/.env
-sudo sed -i "s/yunobase/$db_name/g" $final_path/.env
-sudo sed -i "s/yunomail/$email/g" $final_path/.env
-sudo sed -i "s/yunodomain/$domain/g" $final_path/.env
-sudo sed -i "s/language/$language/g" $final_path/.env
-
-exec_composer "$final_path" update --quiet --no-dev --prefer-dist
 
 # setup application config
 cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
