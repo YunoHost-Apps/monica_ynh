@@ -84,8 +84,6 @@ ynh_system_user_create $app
 # REINSTALL DEPENDENCIES
 #=================================================
 
-init_composer $final_path
-
 # Run migration
 cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
 
