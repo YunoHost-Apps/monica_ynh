@@ -96,6 +96,13 @@ cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
 chown -R $app: $final_path
 
 #=================================================
+# RESTORE THE PHP-FPM CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/php/7.1/fpm/pool.d/$app.conf"
+ynh_restore_file "/etc/php/7.1/fpm/conf.d/20-$app.ini"
+
+#=================================================
 # RESTORE THE CRON FILE
 #=================================================
 
