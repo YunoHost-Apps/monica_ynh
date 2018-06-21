@@ -49,7 +49,6 @@ test ! -d $final_path \
 
 # Define and install dependencies
 ynh_install_php7
-ynh_install_nodejs 9
 
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
@@ -85,7 +84,7 @@ ynh_system_user_create $app
 #=================================================
 
 # Run migration
-cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
+cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force
 
 
 #=================================================

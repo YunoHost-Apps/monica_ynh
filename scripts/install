@@ -72,7 +72,6 @@ ynh_app_setting_set $app random_key $random_key
 #=================================================
 
 ynh_install_php7
-ynh_install_nodejs 9
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -134,17 +133,8 @@ ynh_replace_string  "yunodomain" "$domain"     "$final_path/.env"
 ynh_replace_string  "language"   "$language"   "$final_path/.env"
 
 
-# Install nodejs packages
-cd $final_path && sudo_path npm install 
-cd $final_path && sudo_path npm run production
-
-
 # setup application config
-cd $final_path && sudo /usr/bin/php7.1 artisan config:clear
-cd $final_path && sudo /usr/bin/php7.1 artisan -q migrate --force
-cd $final_path && sudo /usr/bin/php7.1 artisan -q storage:link
-cd $final_path && sudo /usr/bin/php7.1 artisan -q setup:production --force
-
+cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force
 
 # create a cronjob to run the scheduler
 echo "* * * * * -u $app /usr/bin/php7.1 $final_path/artisan schedule:run" > /tmp/cron$app

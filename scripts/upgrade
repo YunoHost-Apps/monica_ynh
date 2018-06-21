@@ -114,7 +114,9 @@ ynh_replace_string  "yunomail"   "$email"      "$final_path/.env"
 ynh_replace_string  "yunodomain" "$domain"     "$final_path/.env"
 ynh_replace_string  "language"   "$language"   "$final_path/.env"
 
-cd $final_path && sudo /usr/bin/php7.1 artisan migrate --force
+
+# Run monica update
+cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force
 
 #=================================================
 # GENERIC FINALIZATION
