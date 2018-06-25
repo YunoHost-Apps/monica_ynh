@@ -176,3 +176,5 @@ fi
 #=================================================
 systemctl reload php7.1-fpm
 systemctl reload nginx
+# Set default php to php7.0
+update-alternatives --set php /usr/bin/php7.0

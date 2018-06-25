@@ -4,7 +4,7 @@
 
 [![Installer Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=monica)
 
-**Shipped version: v2.3.0**
+Shipped version: **v2.3.1**
 <p align="center"><img src="37693034-5783b3d6-2c93-11e8-80ea-bd78438dcd51.png"></p>
 <h1 align="center">Personal Relationship Manager</h1>
 
@@ -36,6 +36,7 @@ Monica is an open-source web application to organize the interactions with your 
 * [X] Backup and restore script (**Need testing**)
 * [X] Multi-instance (**Need testing**)
 * [x] make root domain redirect to index.php
+* [x] Chang URL (Need testing,backup before trying this)
 * [ ] LDAP/SSO support
 * [ ] Make monica installable into subdirectory (eg. https://example.com/monica/)
   * Currently it is only possible to install monica into the root of a domain (eg. https://example.com/)
