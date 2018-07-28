@@ -14,7 +14,7 @@
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">> 2.7.2"
+        "yunohost": ">> 2.4.2"
     },
     "multi_instance": true,
     "services": [
