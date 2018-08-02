@@ -71,6 +71,11 @@ path_url=$(ynh_normalize_url_path $path_url)
 ynh_setup_source "$final_path"
 
 #=================================================
+# INSTALL COMPOSER
+#=================================================
+init_composer $final_path
+
+#=================================================
 # NGINX CONFIGURATION
 #=================================================
 
