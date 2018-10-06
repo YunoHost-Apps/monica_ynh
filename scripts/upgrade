@@ -127,7 +127,7 @@ if [ -f $final_path/storage/oauth-private.key ]; then
 	mobile_key=$(ynh_app_setting_get $app mobile_key)
 else
 	( cd $final_path && sudo /usr/bin/php7.1 artisan passport:client --password -n > key.txt )
-	mobile_id=$( cd $final_path && tail -2 test.txt | head -1 | cut -c 12- )
+	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_keykey=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 	ynh_replace_string  "__IDENTITY__"   "$id"   "$final_path/.env"
 	ynh_replace_string  "__KEY__"        "$key"  "$final_path/.env"
