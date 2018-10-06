@@ -24,7 +24,6 @@ db_name=$(ynh_app_setting_get $app db_name)
 db_pwd=$(ynh_app_setting_get $app mysqlpwd)
 language=$(ynh_app_setting_get $app language)
 random_key=$(ynh_app_setting_get $app random_key)
-
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -95,7 +94,7 @@ ynh_system_user_create $app
 #=================================================
 
 # install new dependencies
-ynh_install_app_dependencies php7.1 php7.1-zip php7.1-fpm php7.1-mysql php7.1-xml php7.1-intl php7.1-mbstring php7.1-gd php7.1-curl php7.1-bcmath
+ynh_install_app_dependencies php7.1 php7.1-cli php7.1-common php7.1-json php7.1-opcache php7.1-mysql php7.1-mbstring php7.1-mcrypt php7.1-zip php7.1-fpm php7.1-bcmath php7.1-intl php7.1-simplexml php7.1-dom php7.1-curl php7.1-gd
 
 #=================================================
 # PHP-FPM 7.1 CONFIGURATION
@@ -123,6 +122,20 @@ ynh_replace_string  "language"   "$language"   "$final_path/.env"
 # Run monica update
 cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force
 
+if [ -f $final_path/storage/oauth-private.key ]; then
+	mobile_id=$(ynh_app_setting_get $app mobile_id)
+	mobile_key=$(ynh_app_setting_get $app mobile_key)
+else
+	( cd $final_path && sudo /usr/bin/php7.1 artisan passport:client --password -n > key.txt )
+	mobile_id=$( cd $final_path && tail -2 test.txt | head -1 | cut -c 12- )
+	mobile_keykey=$( cd $final_path && tail -1 key.txt | cut -c 16- )
+	ynh_replace_string  "__IDENTITY__"   "$id"   "$final_path/.env"
+	ynh_replace_string  "__KEY__"        "$key"  "$final_path/.env"
+	ynh_app_setting_set $app mobile_id $mobile_id
+	ynh_app_setting_set $app mobile_key $mobile_key
+	(cd $final_path && rm -f key.txt)
+	(cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force)
+fi
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
