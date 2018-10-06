@@ -183,6 +183,7 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
+service php7.1-fpm start
 systemctl reload php7.1-fpm
 systemctl reload nginx
 # Set default php to php5 or php7.0
