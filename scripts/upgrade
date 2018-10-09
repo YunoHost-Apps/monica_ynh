@@ -117,6 +117,7 @@ ynh_replace_string  "yunobase"   "$db_name"    "$final_path/.env"
 ynh_replace_string  "yunomail"   "$email"      "$final_path/.env"
 ynh_replace_string  "yunodomain" "$domain"     "$final_path/.env"
 ynh_replace_string  "language"   "$language"   "$final_path/.env"
+ynh_replace_string  "__DOMAIN__" "$domain" "$final_path/.env"
 
 
 # Run monica update
