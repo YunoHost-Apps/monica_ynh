@@ -135,6 +135,7 @@ ynh_replace_string  "language"   "$language"   "$final_path/.env"
 
 # setup application config
 ( cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force )
+( cd $final_path && sudo /usr/bin/php7.1 artisan passport:install )
 ( cd $final_path && sudo /usr/bin/php7.1 artisan passport:client --password -n > key.txt )
 mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
@@ -143,7 +144,7 @@ ynh_replace_string  "__KEY__"        "$mobile_key"  "$final_path/.env"
 ynh_app_setting_set $app mobile_id $mobile_id
 ynh_app_setting_set $app mobile_key $mobile_key
 (cd $final_path && rm -f key.txt)
-(cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force)
+
 
 # create a cronjob to run the scheduler
 echo "* * * * * -u $app /usr/bin/php7.1 $final_path/artisan schedule:run" > /tmp/cron$app

@@ -125,7 +125,10 @@ cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force
 if [ -f $final_path/storage/oauth-private.key ]; then
 	mobile_id=$(ynh_app_setting_get $app mobile_id)
 	mobile_key=$(ynh_app_setting_get $app mobile_key)
+	ynh_replace_string  "__IDENTITY__"   "$mobile_id"   "$final_path/.env"
+	ynh_replace_string  "__KEY__"        "$mobile_key"  "$final_path/.env"
 else
+	( cd $final_path && sudo /usr/bin/php7.1 artisan passport:install )
 	( cd $final_path && sudo /usr/bin/php7.1 artisan passport:client --password -n > key.txt )
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
@@ -134,7 +137,6 @@ else
 	ynh_app_setting_set $app mobile_id $mobile_id
 	ynh_app_setting_set $app mobile_key $mobile_key
 	(cd $final_path && rm -f key.txt)
-	(cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force)
 fi
 #=================================================
 # GENERIC FINALIZATION
