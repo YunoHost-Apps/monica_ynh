@@ -1,6 +1,6 @@
-SOURCE_URL=https://github.com/monicahq/monica/archive/v2.9.0.zip
-SOURCE_SUM=4a4f4ce341950b39f5c07c0066d56063179af91c5857d34553dc30ec77a44e1c
+SOURCE_URL=https://github.com/monicahq/monica/archive/v2.10.0.zip
+SOURCE_SUM=2b93afbc548546b4c31c9658bf0bcd351cc34781a2036a4bef14e004c730f4c9
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=zip
 SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=v2.9.0.zip
+SOURCE_FILENAME=v2.10.0.zip
