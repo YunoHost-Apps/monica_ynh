@@ -34,6 +34,16 @@
                 "example": "monica.com"
             },
             {
+                "name": "path",
+                "type": "path",
+                "ask": {
+                    "en": "Choose a path for Monica",
+                    "fr": "Choisissez un chemin pour Monica"
+                },
+                "example": "/monica",
+                "default": "/monica"
+            },
+            {
                 "name": "admin",
                 "type": "user",
                 "ask": {
