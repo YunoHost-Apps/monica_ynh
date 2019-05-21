@@ -7,7 +7,7 @@
     },
     "url": "https://monica.com",
     "license": "GPL-3.0",
-    "version": "2.12.0",
+    "version": "2.14.0",
     "maintainer": {
         "name": "Sebastian Gumprich",
         "email": "yunohost@gumpri.ch",
@@ -19,7 +19,6 @@
     "multi_instance": true,
     "services": [
         "nginx",
-        "php7.1",
         "mysql"
     ],
     "arguments": {
@@ -32,6 +31,16 @@
                     "fr": "Choisissez un nom de domaine pour Monica"
                 },
                 "example": "monica.com"
+            },
+            {
+                "name": "path",
+                "type": "path",
+                "ask": {
+                    "en": "Choose a path for Monica",
+                    "fr": "Choisissez un chemin pour Monica"
+                },
+                "example": "/monica",
+                "default": "/monica"
             },
             {
                 "name": "admin",

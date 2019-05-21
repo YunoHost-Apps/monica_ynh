@@ -21,7 +21,7 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path_url="/"
+path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
@@ -71,7 +71,7 @@ ynh_app_setting_set $app random_key $random_key
 # INSTALL DEPENDENCIES
 #=================================================
 
-ynh_install_php7
+ynh_install_php7.2
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -89,7 +89,7 @@ ynh_app_setting_set $app final_path $final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source "$final_path"
 
-init_composer $final_path
+init_composer
 
 #=================================================
 # NGINX CONFIGURATION
@@ -106,11 +106,11 @@ ynh_add_nginx_config
 ynh_system_user_create $app
 
 #=================================================
-# PHP-FPM 7.1 CONFIGURATION
+# PHP-FPM 7.2 CONFIGURATION
 #=================================================
 
-# Create a dedicated php-fpm7.1 config
-ynh_add_fpm7.1_config
+# Create a dedicated php-fpm7.2 config
+ynh_add_fpm7.2_config
 
 #=================================================
 # SPECIFIC SETUP
@@ -134,9 +134,9 @@ ynh_replace_string  "language"   "$language"   "$final_path/.env"
 
 
 # setup application config
-( cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force )
-( cd $final_path && sudo /usr/bin/php7.1 artisan passport:install )
-( cd $final_path && sudo /usr/bin/php7.1 artisan passport:client --password -n > key.txt )
+( cd $final_path && sudo /usr/bin/php7.2 artisan monica:update --force )
+( cd $final_path && sudo /usr/bin/php7.2 artisan passport:keys )
+( cd $final_path && sudo /usr/bin/php7.2 artisan passport:client --password -n > key.txt )
 mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 ynh_replace_string  "__IDENTITY__"   "$mobile_id"   "$final_path/.env"
@@ -147,7 +147,7 @@ ynh_app_setting_set $app mobile_key $mobile_key
 
 
 # create a cronjob to run the scheduler
-echo "* * * * * -u $app /usr/bin/php7.1 $final_path/artisan schedule:run" > /tmp/cron$app
+echo "* * * * * -u $app /usr/bin/php7.2 $final_path/artisan schedule:run" > /tmp/cron$app
 sudo mv /tmp/cron$app /etc/cron.d/$app
 
 #=================================================
@@ -184,8 +184,8 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-service php7.1-fpm start
-systemctl reload php7.1-fpm
+service php7.2-fpm start
+systemctl reload php7.2-fpm
 systemctl reload nginx
 # Set default php to php5 or php7.0
 if [ "$(lsb_release --codename --short)" == "jessie" ]; then

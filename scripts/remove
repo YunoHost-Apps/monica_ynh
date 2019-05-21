@@ -51,15 +51,20 @@ ynh_secure_remove "$final_path"
 ynh_remove_nginx_config
 
 #=================================================
-# REMOVE PHP-FPM 7.1 CONFIGURATION
+# REMOVE PHP-FPM 7.2 CONFIGURATION
 #=================================================
 
-# Remove the dedicated php-fpm7.1 config
-ynh_remove_fpm7.1_config
+# Remove the dedicated php-fpm7.2 config
+ynh_remove_fpm_config
 
 
 #=================================================
 # SPECIFIC REMOVE
+#=================================================
+
+# Remove php packages
+ynh_remove_php
+
 #=================================================
 # REMOVE THE CRON FILE
 #=================================================

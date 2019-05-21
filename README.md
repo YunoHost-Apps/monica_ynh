@@ -4,7 +4,7 @@
 
 [![Installer Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=monica)
 
-Shipped version: **2.12.0**
+Shipped version: **2.14.0**
 <p align="center"><img src="37693034-5783b3d6-2c93-11e8-80ea-bd78438dcd51.png"></p>
 <h1 align="center">Personal Relationship Manager</h1>
 
@@ -18,11 +18,11 @@ Shipped version: **2.12.0**
 Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
 ## Install
-##### This app will install PHP7.1 
+##### This app will install PHP7.2 
 ```
  sudo yunohost app install https://github.com/YunoHost-Apps/monica_ynh
 ```
-**First User Registraion:** Visit the app **domain** after the installtion is complete to register as **first user**. After the first user is registerd the registration will be **locked**. You can open the register for all by chaning the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
+**First User Registration:** Visit the app **domain** after the installation is complete to register as **first user**. After the first user is registered the registration will be **locked**. You can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
 
 ## Update
 ```
@@ -38,10 +38,7 @@ Monica is an open-source web application to organize the interactions with your 
 * [x] make root domain redirect to index.php
 * [x] Chang URL (Need testing,backup before trying this)
 * [ ] LDAP/SSO support
-* [ ] Make monica installable into subdirectory (eg. https://example.com/monica/)
-  * Currently it is only possible to install monica into the root of a domain (eg. https://example.com/)
-  * This is due to a limitation in monica, not yunohost!
-  * See [here](https://github.com/monicahq/monica/issues/139) for the current progress.
+* [x] Make monica installable into subdirectory (eg. https://example.com/monica/)
 
 ## License
 
