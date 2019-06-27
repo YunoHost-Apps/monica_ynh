@@ -48,7 +48,7 @@ test ! -d $final_path \
 #=================================================
 
 # Define and install dependencies
-ynh_install_php7
+ynh_install_php7.2
 
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
@@ -84,7 +84,7 @@ ynh_system_user_create $app
 #=================================================
 
 # Run migration
-cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force
+cd $final_path && sudo /usr/bin/php7.2 artisan monica:update --force
 
 
 #=================================================
@@ -98,7 +98,7 @@ chown -R $app: $final_path
 # RESTORE THE PHP-FPM CONFIGURATION
 #=================================================
 
-ynh_restore_file "/etc/php/7.1/fpm/pool.d/$app.conf"
+ynh_restore_file "/etc/php/7.2/fpm/pool.d/$app.conf"
 
 #=================================================
 # RESTORE THE CRON FILE
@@ -112,7 +112,7 @@ ynh_restore_file "/etc/cron.d/$app"
 # RELOAD NGINX AND PHP-FPM
 #=================================================
 
-systemctl reload php7.1-fpm
+systemctl reload php7.2-fpm
 systemctl reload nginx
 # Set default php to php5 or php7.0
 if [ "$(lsb_release --codename --short)" == "jessie" ]; then

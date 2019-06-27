@@ -72,7 +72,7 @@ ynh_setup_source "$final_path"
 #=================================================
 # INSTALL COMPOSER
 #=================================================
-init_composer $final_path
+init_composer
 
 #=================================================
 # NGINX CONFIGURATION
@@ -94,14 +94,14 @@ ynh_system_user_create $app
 #=================================================
 
 # install new dependencies
-ynh_install_app_dependencies php7.1 php7.1-cli php7.1-common php7.1-json php7.1-opcache php7.1-mysql php7.1-mbstring php7.1-mcrypt php7.1-zip php7.1-fpm php7.1-bcmath php7.1-intl php7.1-simplexml php7.1-dom php7.1-curl php7.1-gd
+ynh_update_php_pkg
 
 #=================================================
-# PHP-FPM 7.1 CONFIGURATION
+# PHP-FPM 7.2 CONFIGURATION
 #=================================================
 
-# Create a dedicated php-fpm7.1 config
-ynh_add_fpm7.1_config
+# Create a dedicated php-fpm7.2 config
+ynh_add_fpm7.2_config
 
 # setup application config
 # Get admin email
@@ -121,7 +121,7 @@ ynh_replace_string  "__DOMAIN__" "$domain" "$final_path/.env"
 
 
 # Run monica update
-cd $final_path && sudo /usr/bin/php7.1 artisan monica:update --force
+cd $final_path && sudo /usr/bin/php7.2 artisan monica:update --force
 
 if [ -f $final_path/storage/oauth-private.key ]; then
 	mobile_id=$(ynh_app_setting_get $app mobile_id)
@@ -129,8 +129,8 @@ if [ -f $final_path/storage/oauth-private.key ]; then
 	ynh_replace_string  "__IDENTITY__"   "$mobile_id"   "$final_path/.env"
 	ynh_replace_string  "__KEY__"        "$mobile_key"  "$final_path/.env"
 else
-	( cd $final_path && sudo /usr/bin/php7.1 artisan passport:install )
-	( cd $final_path && sudo /usr/bin/php7.1 artisan passport:client --password -n > key.txt )
+	( cd $final_path && sudo /usr/bin/php7.2 artisan passport:keys )
+	( cd $final_path && sudo /usr/bin/php7.2 artisan passport:client --password -n > key.txt )
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 	ynh_replace_string  "__IDENTITY__"   "$mobile_id"   "$final_path/.env"

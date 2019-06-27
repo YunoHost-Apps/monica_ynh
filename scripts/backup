@@ -56,7 +56,7 @@ ynh_mysql_dump_db "$db_name" > db.sql
 # BACKUP THE PHP-FPM CONFIGURATION
 #=================================================
 
-ynh_backup "/etc/php/7.1/fpm/pool.d/$app.conf"
+ynh_backup "/etc/php/7.2/fpm/pool.d/$app.conf"
 
 #=================================================
 # BACKUP THE CRON FILE
