@@ -78,8 +78,8 @@ ynh_script_progression --message="Installing dependencies..."
 ###		- As well as the section "REINSTALL DEPENDENCIES" in the restore script
 ###		- And the section "UPGRADE DEPENDENCIES" in the upgrade script
 
-
-ynh_install_php --phpversion="7.2" --package="$pkg_dependencies"
+# Create a dedicated php-fpm7.2 config
+ynh_add_fpm_config --phpversion="7.2" --package="$pkg_dependencies"
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -131,26 +131,6 @@ ynh_script_progression --message="Configuring system user..."
 
 # Create a system user
 ynh_system_user_create --username=$app
-
-#=================================================
-# PHP-FPM 7.2 CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring php-fpm..." 
-
-
-### `ynh_add_fpm_config` is used to set up a PHP config.
-### You can remove it if your app doesn't use PHP.
-### `ynh_add_fpm_config` will use the files conf/php-fpm.conf
-### If you're not using these lines:
-###		- You can remove these files in conf/.
-###		- Remove the section "BACKUP THE PHP-FPM CONFIGURATION" in the backup script
-###		- Remove also the section "REMOVE PHP-FPM CONFIGURATION" in the remove script
-###		- As well as the section "RESTORE THE PHP-FPM CONFIGURATION" in the restore script
-###		With the reload at the end of the script.
-###		- And the section "PHP-FPM CONFIGURATION" in the upgrade script
-
-# Create a dedicated php-fpm7.2 config
-ynh_add_fpm_config --phpversion="7.2"
 
 #=================================================
 # SPECIFIC SETUP

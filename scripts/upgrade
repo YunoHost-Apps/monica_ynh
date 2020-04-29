@@ -86,9 +86,8 @@ ynh_setup_source --dest_dir="$final_path"
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..."
-
-ynh_install_php --phpversion="7.2" --package="$pkg_dependencies"
+# Create a dedicated php-fpm7.2 config
+ynh_add_fpm_config --phpversion="7.2" --package="$pkg_dependencies"
 
 #=================================================
 # INSTALL COMPOSER
@@ -119,14 +118,6 @@ ynh_system_user_create --username=$app
 # PHP-FPM CONFIGURATION
 #=================================================
 ynh_script_progression --message="Upgrading php-fpm configuration..." 
-
-
-#=================================================
-# PHP-FPM 7.2 CONFIGURATION
-#=================================================
-
-# Create a dedicated php-fpm7.2 config
-ynh_add_fpm_config --phpversion="7.2"
 
 # setup application config
 # Get admin email
