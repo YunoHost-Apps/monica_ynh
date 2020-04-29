@@ -27,73 +27,99 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
 random_key=$(ynh_string_random 32)
 
-# This is a multi-instance app, meaning it can be installed several times independently
-# The id of the app as stated in the manifest is available as $YNH_APP_ID
-# The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
-# The app instance name is available as $YNH_APP_INSTANCE_NAME
-#    - the first time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample
-#    - the second time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample__2
-#    - ynhexample__{N} for the subsequent installations, with N=3,4, ...
-# The app instance name is probably what you are interested the most, since this is
-# guaranteed to be unique. This is a good unique identifier to define installation path,
-# db names, ...
+### If it's a multi-instance app, meaning it can be installed several times independently
+### The id of the app as stated in the manifest is available as $YNH_APP_ID
+### The instance number is available as $YNH_APP_INSTANCE_NUMBER (equals "1", "2", ...)
+### The app instance name is available as $YNH_APP_INSTANCE_NAME
+###    - the first time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample
+###    - the second time the app is installed, YNH_APP_INSTANCE_NAME = ynhexample__2
+###    - ynhexample__{N} for the subsequent installations, with N=3,4, ...
+### The app instance name is probably what interests you most, since this is
+### guaranteed to be unique. This is a good unique identifier to define installation path,
+### db names, ...
 app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
 
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
-
-# Check web path availability
-ynh_webpath_available $domain $path_url
-# Register (book) web path
-ynh_webpath_register $app $domain $path_url
-
+### If the app uses nginx as web server (written in HTML/PHP in most cases), the final path should be "/var/www/$app".
+### If the app provides an internal web server (or uses another application server such as uwsgi), the final path should be "/opt/yunohost/$app"
 final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die "This path already contains a folder"
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
+
+# Register (book) web path
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path $path_url
-ynh_app_setting_set $app admin $admin
-ynh_app_setting_set $app is_public $is_public
-ynh_app_setting_set $app language $language
-ynh_app_setting_set $app random_key $random_key
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=admin --value=$admin
+ynh_app_setting_set --app=$app --key=is_public --value=$is_public
+ynh_app_setting_set --app=$app --key=language --value=$language
+ynh_app_setting_set --app=$app --key=random_key --value=$random_key
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
+ynh_script_progression --message="Installing dependencies..." 
 
-ynh_install_php7.2
+
+### `ynh_install_app_dependencies` allows you to add any "apt" dependencies to the package.
+### Those deb packages will be installed as dependencies of this package.
+### If you're not using this helper:
+###		- Remove the section "REMOVE DEPENDENCIES" in the remove script
+###		- Remove the variable "pkg_dependencies" in _common.sh
+###		- As well as the section "REINSTALL DEPENDENCIES" in the restore script
+###		- And the section "UPGRADE DEPENDENCIES" in the upgrade script
+
+
+ynh_install_php --phpversion="7.2" --package="$extra_pkg_dependencies"
 
 #=================================================
 # CREATE A MYSQL DATABASE
 #=================================================
+ynh_script_progression --message="Creating a MySQL database..." 
 
-db_name=$(ynh_sanitize_dbid $app)
-ynh_app_setting_set $app db_name $db_name
-ynh_mysql_setup_db $db_name $db_name
+### Use these lines if you need a database for the application.
+### `ynh_mysql_setup_db` will create a database, an associated user and a ramdom password.
+### The password will be stored as 'mysqlpwd' into the app settings,
+### and will be available as $db_pwd
+### If you're not using these lines:
+###		- Remove the section "BACKUP THE MYSQL DATABASE" in the backup script
+###		- Remove also the section "REMOVE THE MYSQL DATABASE" in the remove script
+###		- As well as the section "RESTORE THE MYSQL DATABASE" in the restore script
+
+db_name=$(ynh_sanitize_dbid --db_name=$app)
+db_user=$db_name
+ynh_app_setting_set --app=$app --key=db_name --value=$db_name
+ynh_mysql_setup_db --db_user=$db_user --db_name=$db_name
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_script_progression --message="Setting up source files..."
 
-ynh_app_setting_set $app final_path $final_path
+### `ynh_setup_source` is used to install an app from a zip or tar.gz file,
+### downloaded from an upstream source, like a git repository.
+### `ynh_setup_source` use the file conf/app.src
+
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source "$final_path"
+ynh_setup_source --dest_dir="$final_path"
 
-init_composer
+ynh_install_composer
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
+ynh_script_progression --message="Configuring nginx web server..." 
+### `ynh_add_nginx_config` will use the file conf/nginx.conf
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -101,16 +127,30 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
+ynh_script_progression --message="Configuring system user..." 
 
 # Create a system user
-ynh_system_user_create $app
+ynh_system_user_create --username=$app
 
 #=================================================
 # PHP-FPM 7.2 CONFIGURATION
 #=================================================
+ynh_script_progression --message="Configuring php-fpm..." 
+
+
+### `ynh_add_fpm_config` is used to set up a PHP config.
+### You can remove it if your app doesn't use PHP.
+### `ynh_add_fpm_config` will use the files conf/php-fpm.conf
+### If you're not using these lines:
+###		- You can remove these files in conf/.
+###		- Remove the section "BACKUP THE PHP-FPM CONFIGURATION" in the backup script
+###		- Remove also the section "REMOVE PHP-FPM CONFIGURATION" in the remove script
+###		- As well as the section "RESTORE THE PHP-FPM CONFIGURATION" in the restore script
+###		With the reload at the end of the script.
+###		- And the section "PHP-FPM CONFIGURATION" in the upgrade script
 
 # Create a dedicated php-fpm7.2 config
-ynh_add_fpm7.2_config
+ynh_add_fpm_config --phpversion="7.2"
 
 #=================================================
 # SPECIFIC SETUP
@@ -120,17 +160,17 @@ ynh_add_fpm7.2_config
 email=$(ynh_user_get_info $admin 'mail')
 
 # setup application config
-sudo  cp ../conf/.env $final_path/.env
+cp ../conf/.env $final_path/.env
 
 db_name=$(ynh_sanitize_dbid $app)
-ynh_replace_string  "__DOMAIN__" "$domain" "$final_path/.env"
-ynh_replace_string  "random_key" "$random_key" "$final_path/.env"
-ynh_replace_string  "yunouser"   "$db_name"    "$final_path/.env"
-ynh_replace_string  "yunopass"   "$db_pwd"     "$final_path/.env"
-ynh_replace_string  "yunobase"   "$db_name"    "$final_path/.env"
-ynh_replace_string  "yunomail"   "$email"      "$final_path/.env"
-ynh_replace_string  "yunodomain" "$domain"     "$final_path/.env"
-ynh_replace_string  "language"   "$language"   "$final_path/.env"
+ynh_replace_string  --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$final_path/.env"
+ynh_replace_string  --match_string="random_key" --replace_string="$random_key" --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunouser"   --replace_string="$db_name"    --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunopass"   --replace_string="$db_pwd"     --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunobase"   --replace_string="$db_name"    --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunomail"   --replace_string="$email"      --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunodomain" --replace_string="$domain"     --target_file="$final_path/.env"
+ynh_replace_string  --match_string="language"   --replace_string="$language"   --target_file="$final_path/.env"
 
 
 # setup application config
@@ -139,16 +179,16 @@ ynh_replace_string  "language"   "$language"   "$final_path/.env"
 ( cd $final_path && sudo /usr/bin/php7.2 artisan passport:client --password -n > key.txt )
 mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
-ynh_replace_string  "__IDENTITY__"   "$mobile_id"   "$final_path/.env"
-ynh_replace_string  "__KEY__"        "$mobile_key"  "$final_path/.env"
-ynh_app_setting_set $app mobile_id $mobile_id
-ynh_app_setting_set $app mobile_key $mobile_key
+ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$final_path/.env"
+ynh_replace_string  --match_string="__KEY__"        --replace_string="$mobile_key"  --target_file="$final_path/.env"
+ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
+ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 (cd $final_path && rm -f key.txt)
 
 
 # create a cronjob to run the scheduler
 echo "* * * * * -u $app /usr/bin/php7.2 $final_path/artisan schedule:run" > /tmp/cron$app
-sudo mv /tmp/cron$app /etc/cron.d/$app
+mv /tmp/cron$app /etc/cron.d/$app
 
 #=================================================
 # GENERIC FINALIZATION
@@ -164,32 +204,40 @@ chown -R $app: $final_path
 #=================================================
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$final_path/.env"
+ynh_store_file_checksum --file="$final_path/.env"
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_script_progression --message="Configuring SSOwat..." 
 
-if [ $is_public -eq 0 ]
-then	# Remove the public access
-	ynh_app_setting_delete $app skipped_uris
-fi
+
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
 	# unprotected_uris allows SSO credentials to be passed anyway.
-	ynh_app_setting_set $app unprotected_uris "/"
+	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 fi
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-service php7.2-fpm start
-systemctl reload php7.2-fpm
-systemctl reload nginx
+#service php7.2-fpm start
+#systemctl reload php7.2-fpm
+#systemctl reload nginx
 # Set default php to php5 or php7.0
-if [ "$(lsb_release --codename --short)" == "jessie" ]; then
-	update-alternatives --set php /usr/bin/php5
-else
-    update-alternatives --set php /usr/bin/php7.0
-fi
+#if [ "$(lsb_release --codename --short)" == "jessie" ]; then
+#	update-alternatives --set php /usr/bin/php5
+#else
+#    update-alternatives --set php /usr/bin/php7.0
+#fi
+
+ynh_script_progression --message="Reloading nginx web server..." 
+
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Installation of $app completed" --time --last

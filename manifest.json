@@ -7,14 +7,14 @@
     },
     "url": "https://monicahq.com",
     "license": "GPL-3.0",
-    "version": "2.14.0",
+    "version": "2.17.0~ynh1",
     "maintainer": {
         "name": "Sebastian Gumprich",
         "email": "yunohost@gumpri.ch",
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">> 2.4.2"
+        "yunohost": ">= 3.5"
     },
     "multi_instance": true,
     "services": [

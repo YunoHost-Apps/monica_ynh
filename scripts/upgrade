@@ -12,37 +12,51 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_script_progression --message="Loading installation settings..." 
 
 app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path)
-admin=$(ynh_app_setting_get $app admin)
-is_public=$(ynh_app_setting_get $app is_public)
-final_path=$(ynh_app_setting_get $app final_path)
-db_name=$(ynh_app_setting_get $app db_name)
-db_pwd=$(ynh_app_setting_get $app mysqlpwd)
-language=$(ynh_app_setting_get $app language)
-random_key=$(ynh_app_setting_get $app random_key)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+path_url=$(ynh_app_setting_get --app=$app --key=path)
+admin=$(ynh_app_setting_get --app=$app --key=admin)
+is_public=$(ynh_app_setting_get --app=$app --key=is_public)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
+language=$(ynh_app_setting_get --app=$app --key=language)
+random_key=$(ynh_app_setting_get --app=$app --key=random_key)
+version=$(ynh_read_manifest --key="version")
+
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
+ynh_script_progression --message="Ensuring downward compatibility..."
 
+# Fix is_public as a boolean value
 if [ "$is_public" = "Yes" ]; then
-	ynh_app_setting_set $app is_public 1	# Fix is_public as a boolean value
+	ynh_app_setting_set --app=$app --key=is_public --value=1
 	is_public=1
 elif [ "$is_public" = "No" ]; then
-	ynh_app_setting_set $app is_public 0
+	ynh_app_setting_set --app=$app --key=is_public --value=0
 	is_public=0
 fi
 
-if [ -z $db_name ]; then	# If db_name doesn't exist, create it
-	db_name=$(ynh_sanitize_dbid $app)
-	ynh_app_setting_set $app db_name $db_name
+# If db_name doesn't exist, create it
+if [ -z "$db_name" ]; then
+	db_name=$(ynh_sanitize_dbid --db_name=$app)
+	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 fi
+
+# If final_path doesn't exist, create it
+if [ -z "$final_path" ]; then
+	final_path=/var/www/$app
+	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -67,16 +81,24 @@ path_url=$(ynh_normalize_url_path $path_url)
 #=================================================
 
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source "$final_path"
+ynh_setup_source --dest_dir="$final_path"
+
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Upgrading dependencies..."
+
+ynh_install_php --phpversion="7.2" --package="$pkg_dependencies"
 
 #=================================================
 # INSTALL COMPOSER
 #=================================================
-init_composer
+ynh_install_composer
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
+ynh_script_progression --message="Upgrading nginx web server configuration..." 
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -84,24 +106,27 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..." 
 
-# Create a system user
-ynh_system_user_create $app
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app
 
 
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
+#=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading php-fpm configuration..." 
 
-# install new dependencies
-ynh_update_php_pkg
 
 #=================================================
 # PHP-FPM 7.2 CONFIGURATION
 #=================================================
 
 # Create a dedicated php-fpm7.2 config
-ynh_add_fpm7.2_config
+ynh_add_fpm_config --phpversion="7.2"
 
 # setup application config
 # Get admin email
@@ -110,35 +135,40 @@ sudo  cp ../conf/.env $final_path/.env
 
 db_name=$(ynh_sanitize_dbid $app)
 
-ynh_replace_string  "random_key" "$random_key" "$final_path/.env"
-ynh_replace_string  "yunouser"   "$db_name"    "$final_path/.env"
-ynh_replace_string  "yunopass"   "$db_pwd"     "$final_path/.env"
-ynh_replace_string  "yunobase"   "$db_name"    "$final_path/.env"
-ynh_replace_string  "yunomail"   "$email"      "$final_path/.env"
-ynh_replace_string  "yunodomain" "$domain"     "$final_path/.env"
-ynh_replace_string  "language"   "$language"   "$final_path/.env"
-ynh_replace_string  "__DOMAIN__" "$domain" "$final_path/.env"
+ynh_replace_string  --match_string="random_key" --replace_string="$random_key" --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunouser"   --replace_string="$db_name"    --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunopass"   --replace_string="$db_pwd"     --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunobase"   --replace_string="$db_name"    --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunomail"   --replace_string="$email"      --target_file="$final_path/.env"
+ynh_replace_string  --match_string="yunodomain" --replace_string="$domain"     --target_file="$final_path/.env"
+ynh_replace_string  --match_string="language"   --replace_string="$language"   --target_file="$final_path/.env"
+ynh_replace_string  --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$final_path/.env"
 
 
 # Run monica update
 cd $final_path && sudo /usr/bin/php7.2 artisan monica:update --force
 
 if [ -f $final_path/storage/oauth-private.key ]; then
-	mobile_id=$(ynh_app_setting_get $app mobile_id)
-	mobile_key=$(ynh_app_setting_get $app mobile_key)
-	ynh_replace_string  "__IDENTITY__"   "$mobile_id"   "$final_path/.env"
-	ynh_replace_string  "__KEY__"        "$mobile_key"  "$final_path/.env"
+	mobile_id=$(ynh_app_setting_get --app=$app --key=mobile_id)
+	mobile_key=$(ynh_app_setting_get --app=$app --key=mobile_key)
+	ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$final_path/.env"
+	ynh_replace_string  --match_string="__KEY__"       --replace_string="$mobile_key"  --target_file="$final_path/.env"
 else
 	( cd $final_path && sudo /usr/bin/php7.2 artisan passport:keys )
 	( cd $final_path && sudo /usr/bin/php7.2 artisan passport:client --password -n > key.txt )
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
-	ynh_replace_string  "__IDENTITY__"   "$mobile_id"   "$final_path/.env"
-	ynh_replace_string  "__KEY__"        "$mobile_key"  "$final_path/.env"
-	ynh_app_setting_set $app mobile_id $mobile_id
-	ynh_app_setting_set $app mobile_key $mobile_key
+	ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$final_path/.env"
+	ynh_replace_string  --match_string="__KEY__"        --replace_string="$mobile_key"  --target_file="$final_path/.env"
+	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
+	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	(cd $final_path && rm -f key.txt)
 fi
+
+if [ "$version" -lt "2.15.0" ]; then
+	( cd $final_path && sudo /usr/bin/php7.2 artisan monica:moveavatarstophotosdirectory)
+fi
+
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
@@ -151,26 +181,24 @@ chown -R $app: $final_path
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_script_progression --message="Upgrading SSOwat configuration..."
 
-if [ $is_public -eq 0 ]
-then	# Remove the public access
-	ynh_app_setting_delete $app skipped_uris
-fi
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
 	# unprotected_uris allows SSO credentials to be passed anyway
-	ynh_app_setting_set $app unprotected_uris "/"
+	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 fi
 
 #=================================================
 # RELOAD NGINX
 #=================================================
+ynh_script_progression --message="Reloading nginx web server..." 
 
-systemctl reload nginx
-# Set default php to php5 or php7.0
-if [ "$(lsb_release --codename --short)" == "jessie" ]; then
-	update-alternatives --set php /usr/bin/php5
-else
-    update-alternatives --set php /usr/bin/php7.0
-fi
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Upgrade of $app completed" 
