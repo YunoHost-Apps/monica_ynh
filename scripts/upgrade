@@ -87,12 +87,15 @@ ynh_setup_source --dest_dir="$final_path"
 # UPGRADE DEPENDENCIES
 #=================================================
 # Create a dedicated php-fpm7.2 config
-ynh_add_fpm_config --phpversion="7.2" --package="$pkg_dependencies"
+ynh_print_info --message="Installing php7.2..."
+	ynh_install_php --phpversion="7.2" --package="$pkg_dependencies"
 
 #=================================================
 # INSTALL COMPOSER
 #=================================================
-ynh_install_composer
+# Create a dedicated php-fpm config
+ynh_add_fpm_config --phpversion="7.2"
+ynh_install_composer --phpversion="7.2" --workdir="$final_path"
 
 #=================================================
 # NGINX CONFIGURATION

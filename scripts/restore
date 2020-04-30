@@ -51,7 +51,8 @@ test ! -d $final_path \
 #=================================================
 
 # Create a dedicated php-fpm7.2 config
-ynh_add_fpm_config --phpversion="7.2" --package="$pkg_dependencies"
+ynh_print_info --message="Installing php7.2..."
+	ynh_install_php --phpversion="7.2" --package="$pkg_dependencies"
 
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
@@ -81,6 +82,10 @@ ynh_script_progression --message="Recreating the dedicated system user..."
 
 # Create the dedicated user (if not existing)
 ynh_system_user_create --username=$app
+
+# Create a dedicated php-fpm config
+ynh_add_fpm_config --phpversion="7.2"
+ynh_install_composer --phpversion="7.2" --workdir="$final_path"
 
 #=================================================
 # SPECIFIC RESTORATION

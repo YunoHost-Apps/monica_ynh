@@ -78,8 +78,8 @@ ynh_script_progression --message="Installing dependencies..."
 ###		- As well as the section "REINSTALL DEPENDENCIES" in the restore script
 ###		- And the section "UPGRADE DEPENDENCIES" in the upgrade script
 
-# Create a dedicated php-fpm7.2 config
-ynh_add_fpm_config --phpversion="7.2" --package="$pkg_dependencies"
+ynh_print_info --message="Installing php7.2..."
+	ynh_install_php --phpversion="7.2" --package="$pkg_dependencies"
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -113,7 +113,15 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path"
 
-ynh_install_composer
+#=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
+ynh_print_info --message="Configuring php-fpm..."
+
+# Create a dedicated php-fpm config
+ynh_add_fpm_config --phpversion="7.2"
+
+ynh_install_composer --phpversion="7.2" --workdir="$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
