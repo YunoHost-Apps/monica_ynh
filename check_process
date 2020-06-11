@@ -3,7 +3,7 @@
 
 # Move this file from check_process.default to check_process when you have filled it.
 
-;; Test complete
+;; Test complet
 	; Manifest
 		domain="domain.tld"	(DOMAIN)
 		path="/"	(PATH)
