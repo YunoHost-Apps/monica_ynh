@@ -188,7 +188,7 @@ fi
 
 if [ "$version" -lt "2.15.0" ]; then
 	pushd "$final_path"
-		php$phpversion artisan monica:moveavatarstophotosdirectory)
+		php$phpversion artisan monica:moveavatarstophotosdirectory
 	popd
 fi
 
