@@ -186,7 +186,8 @@ else
 	popd
 fi
 
-if [ "$version" -lt "2.15.0" ]; then
+if [ dpkg --compare-versions "$version" -lt "2.15.0" ]; then
+	ynh_script_progression --message="Upgrading for 2.15.0..."
 	pushd "$final_path"
 		php$phpversion artisan monica:moveavatarstophotosdirectory
 	popd
