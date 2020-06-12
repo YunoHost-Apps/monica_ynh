@@ -27,7 +27,6 @@ language=$(ynh_app_setting_get --app=$app --key=language)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
 random_key=$(ynh_app_setting_get --app=$app --key=random_key)
-version=$(ynh_read_manifest --manifest="../manifest.json" --key=version)
 email=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
