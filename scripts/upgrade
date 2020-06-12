@@ -27,7 +27,7 @@ db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
 random_key=$(ynh_app_setting_get --app=$app --key=random_key)
 version=$(ynh_read_manifest --key="version")
-email=$(ynh_user_get_info $admin 'mail')
+email=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
 # CHECK VERSION
@@ -110,7 +110,7 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Upgrading dependencies..."
 
-ynh_install_app_dependencies "$pkg_dependencies"
+ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE DEDICATED USER
@@ -186,7 +186,7 @@ else
 	popd
 fi
 
-if [ dpkg --compare-versions "$version" -lt "2.15.0" ]; then
+if [ dpkg --compare-versions "$version" lt "2.15.0" ]; then
 	ynh_script_progression --message="Upgrading for 2.15.0..."
 	pushd "$final_path"
 		php$phpversion artisan monica:moveavatarstophotosdirectory
