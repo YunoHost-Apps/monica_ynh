@@ -180,20 +180,12 @@ if [ -f $final_path/storage/oauth-private.key ]; then
 	mobile_key=$(ynh_app_setting_get --app=$app --key=mobile_key)
 	if [ -z $(ynh_app_setting_get --app=$app --key=private_key) ]; then
 		private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $final_path/storage/oauth-private.key)
-		full_private_key="PASSPORT_PRIVATE_KEY="\"$private_key\"
 		public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $final_path/storage/oauth-public.key)
-		full_public_key="PASSPORT_PUBLIC_KEY="\"$public_key\"
-	else
-		private_key=$(ynh_app_setting_get --app=$app --key=private_key)
-		full_private_key="PASSPORT_PRIVATE_KEY="\"$private_key\"
-		public_key=$(ynh_app_setting_get --app=$app --key=public_key)
-		full_public_key="PASSPORT_PUBLIC_KEY="\"$public_key\"
+		ynh_app_setting_set --app=$app --key=private_key --value=$private_key
+		ynh_app_setting_set --app=$app --key=private_key --value=$public_key
 	fi
-
 	ynh_replace_string --match_string="__IDENTITY__" --replace_string="$mobile_id" --target_file="$config"
 	ynh_replace_string --match_string="__KEY__" --replace_string="$mobile_key" --target_file="$config"
-	echo "$full_private_key" >> $final_path/.env
-	echo "$full_public_key" >> $final_path/.env
 else
 	pushd "$final_path"
 		php$phpversion artisan down --retry="10"
@@ -203,11 +195,7 @@ else
 		mobile_key=$( tail -1 key.txt | cut -c 16- )
 		mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 		private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-private.key)
-		full_private_key="PASSPORT_PRIVATE_KEY="\"$private_key\"
 		public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-public.key)
-		full_public_key="PASSPORT_PUBLIC_KEY="\"$public_key\"
-		echo "$full_private_key" >> .env
-		echo "$full_public_key" >> .env
 		ynh_replace_string --match_string="__IDENTITY__" --replace_string="$mobile_id"   --target_file="$config"
 		ynh_replace_string --match_string="__KEY__" --replace_string="$mobile_key"  --target_file="$config"
 		ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
