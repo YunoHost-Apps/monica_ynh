@@ -9,6 +9,8 @@
 source _common.sh
 source ynh_composer__2
 source /usr/share/yunohost/helpers
+source send_readme_to_admin.sh
+source ynh_package_version
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -28,6 +30,7 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
 random_key=$(ynh_string_random --length=32)
 email=$(ynh_user_get_info $admin 'mail')
+password=$(ynh_string_random --length=8)
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -59,14 +62,14 @@ ynh_app_setting_set --app=$app --key=random_key --value=$random_key
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." 
+ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A MYSQL DATABASE
 #=================================================
-ynh_script_progression --message="Creating a MySQL database..." 
+ynh_script_progression --message="Creating a MySQL database..."
 
 db_name=$(ynh_sanitize_dbid --db_name=$app)
 db_user=$db_name
@@ -85,7 +88,7 @@ ynh_setup_source --dest_dir="$final_path"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..." 
+ynh_script_progression --message="Configuring nginx web server..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -93,7 +96,7 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Configuring system user..." 
+ynh_script_progression --message="Configuring system user..."
 
 # Create a system user
 ynh_system_user_create --username=$app
@@ -139,7 +142,7 @@ ynh_replace_string --match_string="language" --replace_string="$language" --targ
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
-	php$phpversion artisan monica:update --force
+	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n
 	php$phpversion artisan passport:keys
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
@@ -180,7 +183,7 @@ chown -R $app: $final_path
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..." 
+ynh_script_progression --message="Configuring SSOwat..."
 
 # Make app public if necessary
 if [ $is_public -eq 1 ]
@@ -192,9 +195,34 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..." 
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# SEND A README FOR THE ADMIN
+#=================================================
+# WARNING : theses command are used in INSTALL
+# For any update do it in all files
+
+echo "Hi,
+-----------------------------------------------------------
+|
+| Welcome to Monica v${last_version}
+|
+-----------------------------------------------------------
+| You can now sign in to your account:
+| username: $email
+| password: $password
+| URL:      https://monica.anmol.net.in
+| It is advised to change your password after first login.
+-----------------------------------------------------------
+Setup is done. Have fun.
+
+
+" > mail_to_send
+
+ynh_send_readme_to_admin --app_message="$mail_to_send" --recipients="$email"
 
 #=================================================
 # END OF SCRIPT
