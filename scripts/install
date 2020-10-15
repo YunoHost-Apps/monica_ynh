@@ -212,7 +212,7 @@ Setup is done. Have fun.
 
 " > mail_to_send
 
-ynh_send_readme_to_admin --app_message="$mail_to_send" --recipients="$email"
+ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="$email"
 
 #=================================================
 # END OF SCRIPT
