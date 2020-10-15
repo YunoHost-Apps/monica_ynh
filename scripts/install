@@ -195,7 +195,7 @@ ynh_systemd_action --service_name=nginx --action=reload
 # WARNING : theses command are used in INSTALL
 # For any update do it in all files
 
-mail_to_send= "Hi,
+echo "Hi,
 -----------------------------------------------------------
 |
 | Welcome to Monica
@@ -210,9 +210,9 @@ mail_to_send= "Hi,
 Setup is done. Have fun.
 
 
-"
+" > mail_to_send
 
-ynh_send_readme_to_admin --app_message="$mail_to_send" --recipients="$email"
+ynh_send_readme_to_admin --app_message="mail_to_send" --type="install" --recipients="$email"
 
 #=================================================
 # END OF SCRIPT
