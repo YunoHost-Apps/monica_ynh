@@ -214,7 +214,7 @@ echo "Hi,
 | You can now sign in to your account:
 | username: $email
 | password: $password
-| URL:      https://monica.anmol.net.in
+| URL:      https://$domain
 | It is advised to change your password after first login.
 -----------------------------------------------------------
 Setup is done. Have fun.
