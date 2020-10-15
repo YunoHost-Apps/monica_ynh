@@ -143,15 +143,6 @@ ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
 	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n
-	php$phpversion artisan passport:keys
-	php$phpversion artisan passport:client --password -n > key.txt
-	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
-	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
-	ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$config"
-	ynh_replace_string  --match_string="__KEY__"        --replace_string="$mobile_key"  --target_file="$config"
-	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
-	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
-	rm -f key.txt
 popd
 
 #=================================================
