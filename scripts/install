@@ -141,7 +141,32 @@ ynh_replace_string --match_string="language" --replace_string="$language" --targ
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
-	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n
+ 	php$phpversion artisan down --retry="10"
+	php$phpversion artisan config:clear
+	php$phpversion artisan route:clear
+	php$phpversion artisan view:clear
+	php$phpversion artisan storage:link
+	php$phpversion artisan monica:migrate --force
+	php$phpversion artisan passport:keys -n
+	php artisan passport:client --personal --no-interaction
+	php$phpversion artisan passport:client --password -n > key.txt
+	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
+	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
+	private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-private.key)
+	full_private_key="PASSPORT_PRIVATE_KEY="\"$private_key\"
+	public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-public.key)
+	full_public_key="PASSPORT_PUBLIC_KEY="\"$public_key\"
+	echo "\n#Output the private key\n$full_private_key" >> .env
+	echo "\n#Output the public key\n$full_public_key" >> .env
+	ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$config"
+	ynh_replace_string  --match_string="__KEY__"        --replace_string="$mobile_key"  --target_file="$config"
+	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
+	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
+	ynh_app_setting_set --app=$app --key=private_key --value=$private_key
+	ynh_app_setting_set --app=$app --key=private_key --value=$public_key
+	rm -f key.txt
+	php$phpversion artisan config:clear
+	php$phpversion artisan up
 popd
 
 #=================================================
@@ -157,7 +182,7 @@ ynh_store_file_checksum --file="$config"
 #=================================================
 ynh_script_progression --message="Installing the cron file..."
 
-echo "* * * * * -u $app /usr/bin/php7.2 $final_path/artisan schedule:run" > /tmp/cron$app
+echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
 mv /tmp/cron$app /etc/cron.d/$app
 
 #=================================================
@@ -195,17 +220,14 @@ ynh_systemd_action --service_name=nginx --action=reload
 # WARNING : theses command are used in INSTALL
 # For any update do it in all files
 
-echo "Hi,
+echo "
 -----------------------------------------------------------
 |
 | Welcome to Monica
 |
 -----------------------------------------------------------
-| You can now sign in to your account:
-| username: $email
-| password: $password
+|You can now log in to your account
 | URL:      https://$domain
-| It is advised to change your password after first login.
 -----------------------------------------------------------
 Setup is done. Have fun.
 
@@ -218,4 +240,4 @@ ynh_send_readme_to_admin --app_message="mail_to_send" --type="install" --recipie
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression --message="Installation of $app completed"
