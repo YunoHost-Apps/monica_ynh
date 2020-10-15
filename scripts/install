@@ -146,7 +146,7 @@ pushd "$final_path"
 	php$phpversion artisan route:clear
 	php$phpversion artisan view:clear
 	php$phpversion artisan storage:link
-	php$phpversion artisan monica:migrate --force
+	php$phpversion artisan monica:update --force
 	php$phpversion artisan passport:keys -n
 	php artisan passport:client --personal --no-interaction
 	php$phpversion artisan passport:client --password -n > key.txt
