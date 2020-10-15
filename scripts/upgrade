@@ -204,7 +204,6 @@ else
 		ynh_app_setting_set --app=$app --key=private_key --value=$public_key
 		rm -f key.txt
 		php$phpversion artisan config:clear
-		php$phpversion artisan up
 	popd
 fi
 
