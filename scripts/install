@@ -141,14 +141,8 @@ ynh_replace_string --match_string="language" --replace_string="$language" --targ
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
- 	php$phpversion artisan down --retry="10"
-	php$phpversion artisan config:clear
-	php$phpversion artisan route:clear
-	php$phpversion artisan view:clear
-	php$phpversion artisan storage:link
 	php$phpversion artisan monica:update --force
-	php$phpversion artisan passport:keys -n
-	php artisan passport:client --personal --no-interaction
+	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
@@ -221,11 +215,13 @@ echo "
 | Welcome to Monica
 |
 -----------------------------------------------------------
-|You can now log in to your account
+| You can now sign in to your account:
+| username: $email
+| password: $password
 | URL:      https://$domain
+| It is advised to change your password after first login.
 -----------------------------------------------------------
 Setup is done. Have fun.
-
 
 " > mail_to_send
 

@@ -188,7 +188,6 @@ if [ -f $final_path/storage/oauth-private.key ]; then
 	ynh_replace_string --match_string="__KEY__" --replace_string="$mobile_key" --target_file="$config"
 else
 	pushd "$final_path"
-		php$phpversion artisan down --retry="10"
 		php$phpversion artisan passport:keys
 		php$phpversion artisan passport:client --password -n > key.txt
 		mobile_id=$( tail -2 key.txt | head -1 | cut -c 12- )
