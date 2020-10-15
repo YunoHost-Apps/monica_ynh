@@ -156,8 +156,8 @@ pushd "$final_path"
 	full_private_key="PASSPORT_PRIVATE_KEY="\"$private_key\"
 	public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-public.key)
 	full_public_key="PASSPORT_PUBLIC_KEY="\"$public_key\"
-	echo "\n#Output the private key\n$full_private_key" >> .env
-	echo "\n#Output the public key\n$full_public_key" >> .env
+	echo "$full_private_key" >> .env
+	echo "$full_public_key" >> .env
 	ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$config"
 	ynh_replace_string  --match_string="__KEY__"        --replace_string="$mobile_key"  --target_file="$config"
 	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
