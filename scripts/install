@@ -141,6 +141,7 @@ ynh_replace_string --match_string="language" --replace_string="$language" --targ
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
+	php$phpversion artisan monica:update --force
 	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
