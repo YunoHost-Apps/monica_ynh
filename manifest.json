@@ -70,6 +70,30 @@
                 },
                 "choices": ["cs","de","en","es","fr","he","it","nl","pt","ru","zh"],
                 "default": "en"
+            },
+            {
+                "name": "dav_support",
+                "type": "boolean",
+                "ask": {
+                    "en": "Enable DAV support?"
+                },
+                "default": true
+            },
+            {
+                "name": "signup",
+                "type": "boolean",
+                "ask": {
+                    "en": "Enable signup for public users?"
+                },
+                "default": false
+            },
+            {
+                "name": "two_factor",
+                "type": "boolean",
+                "ask": {
+                    "en": "Enable Two Factor Authentication for accounts?"
+                },
+                "default": false
             }
         ]
     }

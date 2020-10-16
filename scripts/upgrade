@@ -28,6 +28,9 @@ db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
 random_key=$(ynh_app_setting_get --app=$app --key=random_key)
 email=$(ynh_user_get_info --username=$admin --key=mail)
+dav_support=$(ynh_app_setting_get --app=$app --key=dav_support)
+signup=$(ynh_app_setting_get --app=$app --key=signup)
+two_factor=$(ynh_app_setting_get --app=$app --key=two_factor)
 
 #=================================================
 # CHECK VERSION
@@ -165,6 +168,29 @@ ynh_replace_string  --match_string="yunomail"   --replace_string="$email"      -
 ynh_replace_string  --match_string="yunodomain" --replace_string="$domain"     --target_file="$config"
 ynh_replace_string  --match_string="language"   --replace_string="$language"   --target_file="$config"
 ynh_replace_string  --match_string="__DOMAIN__" --replace_string="$domain"     --target_file="$config"
+if [ $dav_support -eq 0 ]
+then
+	ynh_replace_string --match_string="__DAV__" --replace_string="false" --target_file="$config"
+else
+then
+	ynh_replace_string --match_string="__DAV__" --replace_string="true" --target_file="$config"
+fi
+# Enable or disable signup for public users
+if [ $signup -eq 1 ]
+then
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="false" --target_file="$config"
+else
+then
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="true" --target_file="$config"
+fi
+# Enable or disable two factor authentication support for  users
+if [ $two_factor -eq 1 ]
+then
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="true" --target_file="$config"
+else
+then
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="false" --target_file="$config"
+fi
 
 #=================================================
 # DEPLOYMENT

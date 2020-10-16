@@ -30,6 +30,9 @@ language=$YNH_APP_ARG_LANGUAGE
 random_key=$(ynh_string_random --length=32)
 email=$(ynh_user_get_info $admin 'mail')
 password=$(ynh_string_random --length=8)
+dav_support=$YNH_APP_ARG_DAV_SUPPORT
+signup=$YNH_APP_ARG_SIGNUP
+two_factor=$YNH_APP_ARG_TWO_FACTOR
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -55,6 +58,9 @@ ynh_app_setting_set --app=$app --key=admin --value=$admin
 ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 ynh_app_setting_set --app=$app --key=language --value=$language
 ynh_app_setting_set --app=$app --key=random_key --value=$random_key
+ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
+ynh_app_setting_set --app=$app --key=signup --value=$signup
+ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -134,6 +140,30 @@ ynh_replace_string --match_string="yunobase" --replace_string="$db_name" --targe
 ynh_replace_string --match_string="yunomail" --replace_string="$email" --target_file="$config"
 ynh_replace_string --match_string="yunodomain" --replace_string="$domain" --target_file="$config"
 ynh_replace_string --match_string="language" --replace_string="$language" --target_file="$config"
+# Enable or disable DAV support for users
+if [ $dav_support -eq 0 ]
+then
+	ynh_replace_string --match_string="__DAV__" --replace_string="false" --target_file="$config"
+else
+then
+	ynh_replace_string --match_string="__DAV__" --replace_string="true" --target_file="$config"
+fi
+# Enable or disable signup for public users
+if [ $signup -eq 1 ]
+then
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="false" --target_file="$config"
+else
+then
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="true" --target_file="$config"
+fi
+# Enable or disable two factor authentication support for  users
+if [ $two_factor -eq 1 ]
+then
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="true" --target_file="$config"
+else
+then
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="false" --target_file="$config"
+fi
 
 #=================================================
 # DEPLOY
@@ -141,8 +171,7 @@ ynh_replace_string --match_string="language" --replace_string="$language" --targ
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
-	php$phpversion artisan monica:update --force
-	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n
+	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n --force
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
