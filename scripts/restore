@@ -37,7 +37,7 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
-ynh_script_progression --message="Validating restoration parameters..." 
+ynh_script_progression --message="Validating restoration parameters..."
 
 ynh_webpath_available --domain=$domain --path_url=$path_url \
 	|| ynh_die --message="Path not available: ${domain}${path_url}"
@@ -75,7 +75,7 @@ ynh_script_progression --message="Restoring user rights..."
 
 # Restore permissions on app files
 chown -R $app: $final_path
-
+chmod -R 775 "$final_path/storage"
 #=================================================
 # RESTORE THE PHP-FPM CONFIGURATION
 #=================================================
@@ -126,4 +126,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Restoration completed for $app" 
+ynh_script_progression --message="Restoration completed for $app"

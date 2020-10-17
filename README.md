@@ -43,8 +43,8 @@ Change the settings of the app by changing the values in .env
 ## What works?
 * [X] Update and remove script
 * [X] Upgrade script
-* [X] Backup and restore script (**Need testing**)
-* [X] Multi-instance (**Need testing**)
+* [X] Backup and restore script
+* [X] Multi-instance
 * [x] make root domain redirect to index.php
 * [x] Chang URL (Need testing,backup before trying this)
 * [ ] LDAP/SSO support
