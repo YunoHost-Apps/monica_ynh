@@ -14,7 +14,7 @@
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">= 3.5"
+        "yunohost": ">= 3.8.1"
     },
     "multi_instance": true,
     "services": [
@@ -75,7 +75,8 @@
                 "name": "dav_support",
                 "type": "boolean",
                 "ask": {
-                    "en": "Enable DAV support?"
+                    "en": "Enable DAV support?",
+                    "fr": "Activer le support DAV ?"
                 },
                 "default": true
             },
@@ -83,7 +84,8 @@
                 "name": "signup",
                 "type": "boolean",
                 "ask": {
-                    "en": "Enable signup for public users?"
+                    "en": "Enable signup for public users?",
+                    "fr": "Activer l'inscription pour les utilisateurs publics ?"
                 },
                 "default": false
             },
@@ -91,7 +93,8 @@
                 "name": "two_factor",
                 "type": "boolean",
                 "ask": {
-                    "en": "Enable Two Factor Authentication for accounts?"
+                    "en": "Enable Two Factor Authentication for accounts?",
+                    "fr": "Activer l'authentification à deux facteurs pour les comptes ?"
                 },
                 "default": false
             }
