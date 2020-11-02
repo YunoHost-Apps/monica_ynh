@@ -1,7 +1,6 @@
 # Monica for YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)
-
 [![Install Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=monica)
 
 > *This package allows you to install Monica quickly and simply on a YunoHost server.
@@ -18,7 +17,7 @@ Monica is an open-source web application to organize the interactions with your 
 
 ## Configuration
 
-Change the settings of the app by changing the values in .env
+Change the settings of the app by changing the values in `.env`
 
 ## YunoHost specific features
 
@@ -36,23 +35,9 @@ Change the settings of the app by changing the values in .env
  * Upstream app repository: https://github.com/monicahq/monica
  * YunoHost website: https://yunohost.org/
 
-## Introduction
-
-
-## What works?
-* [X] Update and remove script
-* [X] Upgrade script
-* [X] Backup and restore script
-* [X] Multi-instance
-* [x] make root domain redirect to index.php
-* [x] Chang URL (Need testing,backup before trying this)
-* [ ] LDAP/SSO support
-* [x] Make monica installable into subdirectory (eg. https://example.com/monica/)
-
 ---
 
-Developer info
-----------------
+## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/monica_ynh/tree/testing).
 

@@ -44,3 +44,5 @@ Notification=change
 		name=2.14.0
 	; commit=4b497cf6445fc515070265721f40ceb816864bf1
 		name=2.17.0~ynh1
+	; commit=d03eaae18c5b99f7933ae18378d5567fc46389f5
+		name=2.17.0~ynh2
