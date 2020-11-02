@@ -22,9 +22,7 @@ Change the settings of the app by changing the values in .env
 
 ## YunoHost specific features
 
-#### Multi-user support
-
-**First User Registration:** Visit the app **domain** after the installation is complete to register as **first user**. After the first user is registered the registration will be **locked**. You can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
+- **First User:** An email with credentials for login will be sent to user who was chosen while the installation process of Monica. There is no **admin interface** on Monica, so every registered users will considered as normal user.
 
 #### Supported architectures
 

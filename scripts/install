@@ -8,8 +8,9 @@
 
 source _common.sh
 source ynh_composer__2
-source /usr/share/yunohost/helpers
 source send_readme_to_admin
+source /usr/share/yunohost/helpers
+
 
 #=================================================
 # MANAGE SCRIPT FAILURE
