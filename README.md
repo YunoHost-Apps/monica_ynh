@@ -13,7 +13,7 @@ Monica is an open-source web application to organize the interactions with your 
 
 ## Screenshots
 
-![](https://www.monicahq.com/img/contacts.png)
+![](https://www.monicahq.com/img/dashboard.png)
 
 ## Configuration
 
