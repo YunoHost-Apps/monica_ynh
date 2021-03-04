@@ -205,7 +205,7 @@ ynh_store_file_checksum --file="$config"
 ynh_script_progression --message="Installing the cron file..."
 
 echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
-mv /tmp/cron$app /etc/cron.d/$app
+mv -f /tmp/cron$app /etc/cron.d/$app
 
 #=================================================
 # GENERIC FINALIZATION
@@ -226,9 +226,15 @@ ynh_script_progression --message="Configuring SSOwat..."
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
-	# unprotected_uris allows SSO credentials to be passed anyway.
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+	# Everyone can access the app.
+	# The "main" permission is automatically created before the install script.
+	ynh_permission_update --permission="main" --add="visitors"
 fi
+
+# Giver API permission to visitors
+ynh_permission_create --permission="api" --url "/api" --allowed="visitors" --show_tile="false" --protected="true"
+# Giver DAV permission to visitors
+ynh_permission_create --permission="dav" --url "/dav" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
 # RELOAD NGINX

@@ -256,16 +256,12 @@ chown -R $app: $final_path
 chmod -R 775 "$final_path/storage"
 
 #=================================================
-# SETUP SSOWAT
+# INSTALL THE CRON FILE
 #=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..."
+ynh_script_progression --message="Installing the cron file..."
 
-# Make app public if necessary
-if [ $is_public -eq 1 ]
-then
-	# unprotected_uris allows SSO credentials to be passed anyway
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
-fi
+echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
+mv -f /tmp/cron$app /etc/cron.d/$app
 
 #=================================================
 # RELOAD NGINX
