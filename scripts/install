@@ -34,6 +34,7 @@ password=$YNH_APP_ARG_PASSWORD
 dav_support=$YNH_APP_ARG_DAV_SUPPORT
 signup=$YNH_APP_ARG_SIGNUP
 two_factor=$YNH_APP_ARG_TWO_FACTOR
+version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -62,6 +63,7 @@ ynh_app_setting_set --app=$app --key=random_key --value=$random_key
 ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
 ynh_app_setting_set --app=$app --key=signup --value=$signup
 ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
+ynh_app_setting_set --app=$app --key=version --value=$version
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -89,7 +91,10 @@ ynh_script_progression --message="Setting up source files..."
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path"
+git clone https://github.com/monicahq/monica.git $final_path
+pushd "$final_path"
+	git checkout tags/$version
+popd
 
 #=================================================
 # NGINX CONFIGURATION
@@ -175,7 +180,7 @@ fi
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
-	php$phpversion artisan setup:production --email=$email --password=$password -vvv -n --force
+	php$phpversion artisan setup:production --email=$email --password=$password  -n --force
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )

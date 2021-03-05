@@ -31,6 +31,8 @@ email=$(ynh_user_get_info --username=$admin --key=mail)
 dav_support=$(ynh_app_setting_get --app=$app --key=dav_support)
 signup=$(ynh_app_setting_get --app=$app --key=signup)
 two_factor=$(ynh_app_setting_get --app=$app --key=two_factor)
+version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
+
 
 #=================================================
 # CHECK VERSION
@@ -98,8 +100,13 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	pushd "$final_path"
+		git fetch
+		git checkout tags/$version
+	popd
+
 fi
+ynh_app_setting_set --app=$app --key=version --value=$version
 
 #=================================================
 # NGINX CONFIGURATION
