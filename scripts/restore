@@ -114,13 +114,6 @@ ynh_script_progression --message="Restoring the cron file..."
 ynh_restore_file --origin_path="/etc/cron.d/$app"
 
 #=================================================
-# RESTORE THE CRON FILE
-#=================================================
-ynh_script_progression --message="Restoring the cron file..."
-
-ynh_restore_file --origin_path="/etc/cron.d/$app"
-
-#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # RELOAD NGINX AND PHP-FPM
