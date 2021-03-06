@@ -8,7 +8,9 @@
 
 source _common.sh
 source ynh_composer__2
+source send_readme_to_admin
 source /usr/share/yunohost/helpers
+
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -28,6 +30,11 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
 random_key=$(ynh_string_random --length=32)
 email=$(ynh_user_get_info $admin 'mail')
+password=$(ynh_string_random --length=10)
+dav_support=$YNH_APP_ARG_DAV_SUPPORT
+signup=$YNH_APP_ARG_SIGNUP
+two_factor=$YNH_APP_ARG_TWO_FACTOR
+version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -53,20 +60,24 @@ ynh_app_setting_set --app=$app --key=admin --value=$admin
 ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 ynh_app_setting_set --app=$app --key=language --value=$language
 ynh_app_setting_set --app=$app --key=random_key --value=$random_key
+ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
+ynh_app_setting_set --app=$app --key=signup --value=$signup
+ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
+ynh_app_setting_set --app=$app --key=version --value=$version
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." 
+ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A MYSQL DATABASE
 #=================================================
-ynh_script_progression --message="Creating a MySQL database..." 
+ynh_script_progression --message="Creating a MySQL database..."
 
 db_name=$(ynh_sanitize_dbid --db_name=$app)
 db_user=$db_name
@@ -80,20 +91,23 @@ ynh_script_progression --message="Setting up source files..."
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path"
+git clone https://github.com/monicahq/monica.git $final_path
+pushd "$final_path"
+	git checkout tags/$version
+popd
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..." 
+ynh_script_progression --message="Configuring NGINX web server..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Configuring system user..." 
+ynh_script_progression --message="Configuring system user..."
 
 # Create a system user
 ynh_system_user_create --username=$app
@@ -101,9 +115,9 @@ ynh_system_user_create --username=$app
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring php-fpm..."
+ynh_script_progression --message="Configuring PHP-FPM..."
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config --usage=low --footprint=low --package="$extra_php_dependencies"
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
@@ -112,7 +126,7 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 # INSTALL COMPOSER DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing composer dependencies..."
+ynh_script_progression --message="Installing Composer dependencies..."
 
 ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
 
@@ -132,6 +146,33 @@ ynh_replace_string --match_string="yunobase" --replace_string="$db_name" --targe
 ynh_replace_string --match_string="yunomail" --replace_string="$email" --target_file="$config"
 ynh_replace_string --match_string="yunodomain" --replace_string="$domain" --target_file="$config"
 ynh_replace_string --match_string="language" --replace_string="$language" --target_file="$config"
+# Enable or disable DAV support for users
+if [ $dav_support -eq 0 ]
+then
+	ynh_replace_string --match_string="__DAV__" --replace_string="false" --target_file="$config"
+	dav="Yes"
+else
+	ynh_replace_string --match_string="__DAV__" --replace_string="true" --target_file="$config"
+	dav="No"
+fi
+# Enable or disable signup for public users
+if [ $signup -eq 1 ]
+then
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="false" --target_file="$config"
+	sign="No"
+else
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="true" --target_file="$config"
+	sign="Yes"
+fi
+# Enable or disable two factor authentication support for  users
+if [ $two_factor -eq 1 ]
+then
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="true" --target_file="$config"
+	twof="Yes"
+else
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="false" --target_file="$config"
+	twof="No"
+fi
 
 #=================================================
 # DEPLOY
@@ -139,16 +180,20 @@ ynh_replace_string --match_string="language" --replace_string="$language" --targ
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
-	php$phpversion artisan monica:update --force
-	php$phpversion artisan passport:keys
+	php$phpversion artisan setup:production --email=$email --password=$password  -n --force
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
+	private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-private.key)
+	public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-public.key)
 	ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$config"
 	ynh_replace_string  --match_string="__KEY__"        --replace_string="$mobile_key"  --target_file="$config"
 	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
+	ynh_app_setting_set --app=$app --key=private_key --value=$private_key
+	ynh_app_setting_set --app=$app --key=private_key --value=$public_key
 	rm -f key.txt
+	php$phpversion artisan config:clear
 popd
 
 #=================================================
@@ -164,8 +209,8 @@ ynh_store_file_checksum --file="$config"
 #=================================================
 ynh_script_progression --message="Installing the cron file..."
 
-echo "* * * * * -u $app /usr/bin/php7.2 $final_path/artisan schedule:run" > /tmp/cron$app
-mv /tmp/cron$app /etc/cron.d/$app
+echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
+mv -f /tmp/cron$app /etc/cron.d/$app
 
 #=================================================
 # GENERIC FINALIZATION
@@ -176,28 +221,62 @@ ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app: $final_path
+chmod -R 775 "$final_path/storage"
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..." 
+ynh_script_progression --message="Configuring SSOwat..."
 
 # Make app public if necessary
 if [ $is_public -eq 1 ]
 then
-	# unprotected_uris allows SSO credentials to be passed anyway.
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+	# Everyone can access the app.
+	# The "main" permission is automatically created before the install script.
+	ynh_permission_update --permission="main" --add="visitors"
 fi
+
+# Giver API permission to visitors
+ynh_permission_create --permission="api" --url "/api" --allowed="visitors" --show_tile="false" --protected="true"
+# Giver DAV permission to visitors
+ynh_permission_create --permission="dav" --url "/dav" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..." 
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# SEND A README FOR THE ADMIN
+#=================================================
+# WARNING : theses command are used in INSTALL
+# For any update do it in all files
+
+echo "
+-----------------------------------------------------------
+|
+| Welcome to Monica
+|
+-----------------------------------------------------------
+| You can now sign in to your account:
+| username: $email
+| password: $password
+| URL:      https://$domain
+| Dav support: $dav
+| Allowed registration for new users: $sign
+| Allowed Two Factor Authentication for accounts: $twof
+| It is advised to change your password after first login.
+-----------------------------------------------------------
+Setup is done. Have fun.
+
+" > mail_to_send
+
+ynh_send_readme_to_admin --app_message="mail_to_send" --type="install" --recipients="$email"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression --message="Installation of $app completed"

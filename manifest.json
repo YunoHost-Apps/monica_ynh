@@ -5,7 +5,7 @@
     "description": {
         "en": " Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family."
     },
-    "version": "2.17.0~ynh2",
+    "version": "2.19.1~ynh1",
     "url": "https://monicahq.com",
     "license": "GPL-3.0",
     "maintainer": {
@@ -14,7 +14,7 @@
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">= 3.5"
+        "yunohost": ">= 3.8.1"
     },
     "multi_instance": true,
     "services": [
@@ -70,6 +70,33 @@
                 },
                 "choices": ["cs","de","en","es","fr","he","it","nl","pt","ru","zh"],
                 "default": "en"
+            },
+            {
+                "name": "dav_support",
+                "type": "boolean",
+                "ask": {
+                    "en": "Enable DAV support?",
+                    "fr": "Activer le support DAV ?"
+                },
+                "default": true
+            },
+            {
+                "name": "signup",
+                "type": "boolean",
+                "ask": {
+                    "en": "Enable signup for public users?",
+                    "fr": "Activer l'inscription pour les utilisateurs publics ?"
+                },
+                "default": false
+            },
+            {
+                "name": "two_factor",
+                "type": "boolean",
+                "ask": {
+                    "en": "Enable Two Factor Authentication for accounts?",
+                    "fr": "Activer l'authentification à deux facteurs pour les comptes ?"
+                },
+                "default": false
             }
         ]
     }

@@ -14,7 +14,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." 
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -28,6 +28,11 @@ db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
 random_key=$(ynh_app_setting_get --app=$app --key=random_key)
 email=$(ynh_user_get_info --username=$admin --key=mail)
+dav_support=$(ynh_app_setting_get --app=$app --key=dav_support)
+signup=$(ynh_app_setting_get --app=$app --key=signup)
+two_factor=$(ynh_app_setting_get --app=$app --key=two_factor)
+version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
+
 
 #=================================================
 # CHECK VERSION
@@ -85,13 +90,6 @@ ynh_clean_setup () {
 ynh_abort_if_errors
 
 #=================================================
-# CHECK THE PATH
-#=================================================
-
-# Normalize the URL path syntax
-path_url=$(ynh_normalize_url_path --path_url=$path_url)
-
-#=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -102,15 +100,24 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	if [ `cd $final_path && git rev-parse --is-inside-work-tree` ]; then
+		pushd "$final_path"
+			git fetch
+			git checkout tags/$version
+		popd
+	else
+		ynh_setup_source --dest_dir="$final_path"
+	fi
+
 fi
+ynh_app_setting_set --app=$app --key=version --value=$version
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..." 
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
@@ -123,7 +130,7 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..." 
+ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app
@@ -131,9 +138,9 @@ ynh_system_user_create --username=$app
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading php-fpm configuration..." 
+ynh_script_progression --message="Upgrading PHP-FPM configuration..."
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config --usage=low --footprint=low --package="$extra_php_dependencies"
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
@@ -142,9 +149,9 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 # UPDATE PHP DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Updating php dependencies..."
+ynh_script_progression --message="Updating PHP dependencies..."
 
-chown -R "$app": "$final_path"
+chown -R $app: "$final_path"
 
 ynh_exec_warn_less ynh_composer_exec --phpversion="$phpversion" --workdir="$final_path" --commands="update"
 
@@ -164,7 +171,34 @@ ynh_replace_string  --match_string="yunobase"   --replace_string="$db_name"    -
 ynh_replace_string  --match_string="yunomail"   --replace_string="$email"      --target_file="$config"
 ynh_replace_string  --match_string="yunodomain" --replace_string="$domain"     --target_file="$config"
 ynh_replace_string  --match_string="language"   --replace_string="$language"   --target_file="$config"
-ynh_replace_string  --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
+ynh_replace_string  --match_string="__DOMAIN__" --replace_string="$domain"     --target_file="$config"
+# Enable or disable DAV support for users
+if [ $dav_support -eq 0 ]
+then
+	ynh_replace_string --match_string="__DAV__" --replace_string="false" --target_file="$config"
+else
+	ynh_replace_string --match_string="__DAV__" --replace_string="true" --target_file="$config"
+	dav_support=1
+	ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
+fi
+# Enable or disable signup for public users
+if [ $signup -eq 1 ]
+then
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="false" --target_file="$config"
+else
+	ynh_replace_string --match_string="__SIGNUP__" --replace_string="true" --target_file="$config"
+	signup=0
+	ynh_app_setting_set --app=$app --key=signup --value=$signup
+fi
+# Enable or disable two factor authentication support for  users
+if [ $two_factor -eq 1 ]
+then
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="true" --target_file="$config"
+else
+	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="false" --target_file="$config"
+	two_factor=0
+	ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
+fi
 
 #=================================================
 # DEPLOYMENT
@@ -178,6 +212,12 @@ popd
 if [ -f $final_path/storage/oauth-private.key ]; then
 	mobile_id=$(ynh_app_setting_get --app=$app --key=mobile_id)
 	mobile_key=$(ynh_app_setting_get --app=$app --key=mobile_key)
+	if [ -z $(ynh_app_setting_get --app=$app --key=private_key) ]; then
+		private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $final_path/storage/oauth-private.key)
+		public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' $final_path/storage/oauth-public.key)
+		ynh_app_setting_set --app=$app --key=private_key --value=$private_key
+		ynh_app_setting_set --app=$app --key=private_key --value=$public_key
+	fi
 	ynh_replace_string --match_string="__IDENTITY__" --replace_string="$mobile_id" --target_file="$config"
 	ynh_replace_string --match_string="__KEY__" --replace_string="$mobile_key" --target_file="$config"
 else
@@ -186,11 +226,17 @@ else
 		php$phpversion artisan passport:client --password -n > key.txt
 		mobile_id=$( tail -2 key.txt | head -1 | cut -c 12- )
 		mobile_key=$( tail -1 key.txt | cut -c 16- )
+		mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
+		private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-private.key)
+		public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-public.key)
 		ynh_replace_string --match_string="__IDENTITY__" --replace_string="$mobile_id"   --target_file="$config"
 		ynh_replace_string --match_string="__KEY__" --replace_string="$mobile_key"  --target_file="$config"
 		ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 		ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
+		ynh_app_setting_set --app=$app --key=private_key --value=$private_key
+		ynh_app_setting_set --app=$app --key=private_key --value=$public_key
 		rm -f key.txt
+		php$phpversion artisan config:clear
 	popd
 fi
 
@@ -218,23 +264,20 @@ ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions on app files
 chown -R $app: $final_path
+chmod -R 775 "$final_path/storage"
 
 #=================================================
-# SETUP SSOWAT
+# INSTALL THE CRON FILE
 #=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..."
+ynh_script_progression --message="Installing the cron file..."
 
-# Make app public if necessary
-if [ $is_public -eq 1 ]
-then
-	# unprotected_uris allows SSO credentials to be passed anyway
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
-fi
+echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
+mv -f /tmp/cron$app /etc/cron.d/$app
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..." 
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -242,4 +285,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed" 
+ynh_script_progression --message="Upgrade of $app completed"
