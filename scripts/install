@@ -7,10 +7,8 @@
 #=================================================
 
 source _common.sh
-source ynh_composer__2
-source send_readme_to_admin
+source ynh_send_readme_to_admin
 source /usr/share/yunohost/helpers
-
 
 #=================================================
 # MANAGE SCRIPT FAILURE
@@ -57,7 +55,6 @@ ynh_script_progression --message="Storing installation settings..."
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
 ynh_app_setting_set --app=$app --key=admin --value=$admin
-ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 ynh_app_setting_set --app=$app --key=language --value=$language
 ynh_app_setting_set --app=$app --key=random_key --value=$random_key
 ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
@@ -73,6 +70,14 @@ ynh_app_setting_set --app=$app --key=version --value=$version
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Configuring system user..."
+
+# Create a system user
+ynh_system_user_create --username=$app --home_dir=$final_path
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -96,6 +101,10 @@ pushd "$final_path"
 	git checkout tags/$version
 popd
 
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -103,14 +112,6 @@ ynh_script_progression --message="Configuring NGINX web server..."
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Configuring system user..."
-
-# Create a system user
-ynh_system_user_create --username=$app
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -131,48 +132,42 @@ ynh_script_progression --message="Installing Composer dependencies..."
 ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
 
 #=================================================
-# MODIFY A CONFIG FILE
+# ADD A CONFIGURATION
 #=================================================
-ynh_script_progression --message="Modifying a config file..."
+ynh_script_progression --message="Adding a configuration file..."
 
 config="$final_path/.env"
-cp ../conf/.env "$config"
 
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="random_key" --replace_string="$random_key" --target_file="$config"
-ynh_replace_string --match_string="yunouser" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="yunopass" --replace_string="$db_pwd" --target_file="$config"
-ynh_replace_string --match_string="yunobase" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="yunomail" --replace_string="$email" --target_file="$config"
-ynh_replace_string --match_string="yunodomain" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="language" --replace_string="$language" --target_file="$config"
 # Enable or disable DAV support for users
 if [ $dav_support -eq 0 ]
 then
-	ynh_replace_string --match_string="__DAV__" --replace_string="false" --target_file="$config"
+	dav_boolean="false"
 	dav="Yes"
 else
-	ynh_replace_string --match_string="__DAV__" --replace_string="true" --target_file="$config"
+	dav_boolean="true"
 	dav="No"
 fi
 # Enable or disable signup for public users
 if [ $signup -eq 1 ]
 then
-	ynh_replace_string --match_string="__SIGNUP__" --replace_string="false" --target_file="$config"
+	sign_boolean="false"
 	sign="No"
 else
-	ynh_replace_string --match_string="__SIGNUP__" --replace_string="true" --target_file="$config"
+	sign_boolean="true"
 	sign="Yes"
 fi
 # Enable or disable two factor authentication support for  users
 if [ $two_factor -eq 1 ]
 then
-	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="true" --target_file="$config"
+	twof_boolean="true"
 	twof="Yes"
 else
-	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="false" --target_file="$config"
+	twof_boolean="false"
 	twof="No"
 fi
+ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="$twof_boolean" --target_file="$config"
+
+ynh_add_config --template="../conf/.env" --destination="$config"
 
 #=================================================
 # DEPLOY
@@ -204,6 +199,9 @@ ynh_script_progression --message="Storing the config file checksum..."
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum --file="$config"
 
+chmod 400 "$config"
+chown $app:$app "$config"
+
 #=================================================
 # INSTALL THE CRON FILE
 #=================================================
@@ -215,18 +213,9 @@ mv -f /tmp/cron$app /etc/cron.d/$app
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
-ynh_script_progression --message="Securing files and directories..."
-
-# Set permissions to app files
-chown -R $app: $final_path
-chmod -R 775 "$final_path/storage"
-
-#=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring permissions..."
 
 # Make app public if necessary
 if [ $is_public -eq 1 ]
@@ -237,9 +226,9 @@ then
 fi
 
 # Giver API permission to visitors
-ynh_permission_create --permission="api" --url "/api" --allowed="visitors" --show_tile="false" --protected="true"
+ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
 # Giver DAV permission to visitors
-ynh_permission_create --permission="dav" --url "/dav" --allowed="visitors" --show_tile="false" --protected="true"
+ynh_permission_create --permission="dav" --url="/dav" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
 # RELOAD NGINX
