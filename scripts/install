@@ -176,6 +176,8 @@ ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$f
 #=================================================
 ynh_script_progression --message="Deploying..."
 
+update-alternatives --set php /usr/bin/php$phpversion
+
 pushd "$final_path"
 	ynh_use_nodejs
 	yarn install
@@ -196,6 +198,8 @@ pushd "$final_path"
 	rm -f key.txt
 	php$phpversion artisan config:clear
 popd
+
+update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM

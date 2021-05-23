@@ -196,6 +196,8 @@ ynh_add_config --template="../conf/.env" --destination="$config"
 #=================================================
 ynh_script_progression --message="Deploying..."
 
+update-alternatives --set php /usr/bin/php$phpversion
+
 pushd "$final_path"	
 	ynh_use_nodejs
 	yarn install
@@ -240,6 +242,8 @@ if ynh_version_gt "2.15.0" "${previous_version}" ; then
 		php$phpversion artisan monica:moveavatarstophotosdirectory
 	popd
 fi
+
+update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
