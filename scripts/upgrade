@@ -133,6 +133,9 @@ ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
+ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
+ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ stable main" --package="yarn" --key="https://dl.yarnpkg.com/debian/pubkey.gpg"
+
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
@@ -193,7 +196,10 @@ ynh_add_config --template="../conf/.env" --destination="$config"
 #=================================================
 ynh_script_progression --message="Deploying..."
 
-pushd "$final_path"
+pushd "$final_path"	
+	ynh_use_nodejs
+	yarn install
+	yarn run production
 	php$phpversion artisan monica:update --force
 popd
 
@@ -206,8 +212,8 @@ if [ -f $final_path/storage/oauth-private.key ]; then
 		ynh_app_setting_set --app=$app --key=private_key --value=$private_key
 		ynh_app_setting_set --app=$app --key=private_key --value=$public_key
 	fi
-	ynh_replace_string --match_string="__IDENTITY__" --replace_string="$mobile_id" --target_file="$config"
-	ynh_replace_string --match_string="__KEY__" --replace_string="$mobile_key" --target_file="$config"
+	ynh_replace_string --match_string="_IDENTITY_" --replace_string="$mobile_id" --target_file="$config"
+	ynh_replace_string --match_string="_KEY_" --replace_string="$mobile_key" --target_file="$config"
 else
 	pushd "$final_path"
 		php$phpversion artisan passport:keys
@@ -217,8 +223,8 @@ else
 		mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 		private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-private.key)
 		public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-public.key)
-		ynh_replace_string --match_string="__IDENTITY__" --replace_string="$mobile_id"   --target_file="$config"
-		ynh_replace_string --match_string="__KEY__" --replace_string="$mobile_key"  --target_file="$config"
+		ynh_replace_string --match_string="_IDENTITY_" --replace_string="$mobile_id"   --target_file="$config"
+		ynh_replace_string --match_string="_KEY_" --replace_string="$mobile_key"  --target_file="$config"
 		ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 		ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 		ynh_app_setting_set --app=$app --key=private_key --value=$private_key

@@ -71,6 +71,9 @@ ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
+ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
+ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ stable main" --package="yarn" --key="https://dl.yarnpkg.com/debian/pubkey.gpg"
+
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
@@ -125,13 +128,6 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# INSTALL COMPOSER DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Installing Composer dependencies..."
-
-ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
-
-#=================================================
 # ADD A CONFIGURATION
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
@@ -169,19 +165,30 @@ fi
 ynh_add_config --template="../conf/.env" --destination="$config"
 
 #=================================================
+# INSTALL COMPOSER DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Installing Composer dependencies..."
+
+ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
+
+#=================================================
 # DEPLOY
 #=================================================
 ynh_script_progression --message="Deploying..."
 
 pushd "$final_path"
+	ynh_use_nodejs
+	yarn install
+	yarn run production
+	
 	php$phpversion artisan setup:production --email=$email --password=$password  -n --force
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 	private_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-private.key)
 	public_key=$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' storage/oauth-public.key)
-	ynh_replace_string  --match_string="__IDENTITY__"   --replace_string="$mobile_id"   --target_file="$config"
-	ynh_replace_string  --match_string="__KEY__"        --replace_string="$mobile_key"  --target_file="$config"
+	ynh_replace_string  --match_string="_IDENTITY_"   --replace_string="$mobile_id"   --target_file="$config"
+	ynh_replace_string  --match_string="_KEY_"        --replace_string="$mobile_key"  --target_file="$config"
 	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_app_setting_set --app=$app --key=private_key --value=$private_key
