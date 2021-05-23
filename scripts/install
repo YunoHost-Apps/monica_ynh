@@ -165,7 +165,6 @@ else
 	twof_boolean="false"
 	twof="No"
 fi
-ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="$twof_boolean" --target_file="$config"
 
 ynh_add_config --template="../conf/.env" --destination="$config"
 
