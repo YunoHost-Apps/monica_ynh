@@ -143,6 +143,7 @@ else
 	dav_boolean="true"
 	dav="No"
 fi
+
 # Enable or disable signup for public users
 if [ $signup -eq 1 ]
 then
@@ -152,6 +153,8 @@ else
 	sign_boolean="true"
 	sign="Yes"
 fi
+
+
 # Enable or disable two factor authentication support for  users
 if [ $two_factor -eq 1 ]
 then

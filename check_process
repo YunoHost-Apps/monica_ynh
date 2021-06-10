@@ -5,9 +5,9 @@
 		admin="john"
 		is_public=1	(PUBLIC|public=1|private=0)
 		language="fr"
-		dav_support=1 (DAV_SUPPORT|dav_support=1|dav_support=0)
-		signup=0  (SIGNUP|signup=1|signup=0)
-		two_factor=0 (TWO_FACTOR|two_factor=1|two_factor=0)
+		dav_support=1
+		signup=0
+		two_factor=0
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=0
