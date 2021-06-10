@@ -7,7 +7,6 @@
 #=================================================
 
 source _common.sh
-source ynh_package_version
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -29,7 +28,6 @@ email=$(ynh_user_get_info --username=$admin --key=mail)
 dav_support=$(ynh_app_setting_get --app=$app --key=dav_support)
 signup=$(ynh_app_setting_get --app=$app --key=signup)
 two_factor=$(ynh_app_setting_get --app=$app --key=two_factor)
-version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
 
 #=================================================
 # CHECK VERSION
@@ -76,21 +74,18 @@ if ! ynh_permission_exists --permission="api"; then
 	ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
 fi
 
+# Create a permission if needed
+if ! ynh_permission_exists --permission="dav"; then
+	ynh_permission_create --permission="dav" --url="/dav" --allowed="visitors" --show_tile="false" --protected="true"
+fi
+
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
 ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app
-
-#=================================================
-# CHECK VERSION NUMBER
-#=================================================
-
-abort_if_up_to_date
-# previous function is what defines 'version', more precisely the 'previous version'
-previous_version="${version}"
+ynh_system_user_create --username=$app --home_dir=$final_path
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -101,18 +96,8 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	if git -C "$final_path" rev-parse --is-inside-work-tree` >/dev/null 2>/dev/null
-	then
-		pushd "$final_path"
-			git fetch
-			git checkout tags/$version
-		popd
-	else
-		ynh_setup_source --dest_dir="$final_path"
-	fi
-
+	ynh_setup_source --dest_dir="$final_path"
 fi
-ynh_app_setting_set --app=$app --key=version --value=$version
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"

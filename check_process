@@ -3,14 +3,14 @@
 		domain="domain.tld"
 		path="/path"
 		admin="john"
-		is_public=1	(PUBLIC|public=1|private=0)
 		language="fr"
+		is_public=1
 		dav_support=1
 		signup=0
 		two_factor=0
 	; Checks
 		pkg_linter=1
-		setup_sub_dir=0
+		setup_sub_dir=1
 		setup_root=1
 		setup_nourl=0
 		setup_private=1
@@ -24,10 +24,8 @@
 		upgrade=1	from_commit=d03eaae18c5b99f7933ae18378d5567fc46389f5
 		backup_restore=1
 		multi_instance=1
-		# This test is no longer necessary since the version 2.7 (PR: https://github.com/YunoHost/yunohost/pull/304), you can still do it if your app could be installed with this version.
-		# incorrect_path=1
 		port_already_use=0
-		change_url=0
+		change_url=1
 ;;; Options
 Email=anmol@datamol.org
 Notification=change

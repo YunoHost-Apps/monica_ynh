@@ -32,7 +32,6 @@ password=$(ynh_string_random --length=10)
 dav_support=$YNH_APP_ARG_DAV_SUPPORT
 signup=$YNH_APP_ARG_SIGNUP
 two_factor=$YNH_APP_ARG_TWO_FACTOR
-version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -60,7 +59,6 @@ ynh_app_setting_set --app=$app --key=random_key --value=$random_key
 ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
 ynh_app_setting_set --app=$app --key=signup --value=$signup
 ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
-ynh_app_setting_set --app=$app --key=version --value=$version
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -99,10 +97,7 @@ ynh_script_progression --message="Setting up source files..."
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
-git clone https://github.com/monicahq/monica.git $final_path
-pushd "$final_path"
-	git checkout tags/$version
-popd
+ynh_setup_source --dest_dir="$final_path"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
