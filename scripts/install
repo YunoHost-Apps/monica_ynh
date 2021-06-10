@@ -149,30 +149,37 @@ ynh_replace_string --match_string="language" --replace_string="$language" --targ
 # Enable or disable DAV support for users
 if [ $dav_support -eq 0 ]
 then
-	ynh_replace_string --match_string="__DAV__" --replace_string="false" --target_file="$config"
+        dav_boolean="false"
 	dav="Yes"
 else
-	ynh_replace_string --match_string="__DAV__" --replace_string="true" --target_file="$config"
+        dav_boolean="true"
 	dav="No"
 fi
+
 # Enable or disable signup for public users
 if [ $signup -eq 1 ]
 then
-	ynh_replace_string --match_string="__SIGNUP__" --replace_string="false" --target_file="$config"
+	sign_boolean="false"
 	sign="No"
 else
-	ynh_replace_string --match_string="__SIGNUP__" --replace_string="true" --target_file="$config"
+	sign_boolean="true"
 	sign="Yes"
 fi
+
+
 # Enable or disable two factor authentication support for  users
 if [ $two_factor -eq 1 ]
 then
-	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="true" --target_file="$config"
+	twof_boolean="true"
 	twof="Yes"
 else
-	ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="false" --target_file="$config"
+	twof_boolean="false"
 	twof="No"
 fi
+
+ynh_replace_string --match_string="__DAV__" --replace_string="$dav_boolean" --target_file="$config"
+ynh_replace_string --match_string="__SIGNUP__" --replace_string="$sign_boolean" --target_file="$config"
+ynh_replace_string --match_string="__TWO_FACTOR__" --replace_string="$twof_boolean" --target_file="$config"
 
 #=================================================
 # DEPLOY
