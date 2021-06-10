@@ -1,29 +1,28 @@
-# Monica app for YunoHost
+# Monica for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)
+
 [![Install Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=monica)
 
-> *This package allows you to install Monica quickly and simply on a YunoHost server.  
+> *This package allows you to install Monica quickly and simply on a YunoHost server.
 If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/install) to learn how to install it.*
 
 ## Overview
 Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
-**Shipped version:** 2.17.0
+**Shipped version:** 3.0.1
 
 ## Screenshots
 
-![](https://www.monicahq.com/img/contacts.png)
+![](https://www.monicahq.com/img/dashboard.png)
 
 ## Configuration
 
-Change the settings of the app by changing the values in .env
+Change the settings of the app by changing the values in `.env`
 
 ## YunoHost specific features
 
-#### Multi-user support
-
-**First User Registration:** Visit the app **domain** after the installation is complete to register as **first user**. After the first user is registered the registration will be **locked**. You can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
+- **First User:** An email with credentials for login will be sent to user who was chosen while the installation process of Monica. There is no **admin interface** on Monica, so every registered users will considered as normal user.
 
 #### Supported architectures
 
@@ -37,23 +36,9 @@ Change the settings of the app by changing the values in .env
  * Upstream app repository: https://github.com/monicahq/monica
  * YunoHost website: https://yunohost.org/
 
-## Introduction
-
-
-## What works?
-* [X] Update and remove script
-* [X] Upgrade script
-* [X] Backup and restore script (**Need testing**)
-* [X] Multi-instance (**Need testing**)
-* [x] make root domain redirect to index.php
-* [x] Chang URL (Need testing,backup before trying this)
-* [ ] LDAP/SSO support
-* [x] Make monica installable into subdirectory (eg. https://example.com/monica/)
-
 ---
 
-Developer info
-----------------
+## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/monica_ynh/tree/testing).
 
