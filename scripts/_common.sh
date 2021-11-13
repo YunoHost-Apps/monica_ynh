@@ -5,7 +5,6 @@
 #=================================================
 
 # dependencies used by the app
-pkg_dependencies="redis-server"
 YNH_COMPOSER_VERSION="2.0.11"
 YNH_PHP_VERSION="7.4"
 NODEJS_VERSION=14
