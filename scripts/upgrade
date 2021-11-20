@@ -221,9 +221,9 @@ update-alternatives --set php /usr/bin/php$phpversion
 
 pushd "$final_path"
 	ynh_use_nodejs
-	yarn install
-	yarn run production
-	php$phpversion artisan monica:update --force
+	ynh_exec_warn_less yarn install
+	ynh_exec_warn_less yarn run production
+	ynh_exec_warn_less php$phpversion artisan monica:update --force
 popd
 
 if [ -f $final_path/storage/oauth-private.key ]; then

@@ -183,7 +183,7 @@ pushd "$final_path"
 	ynh_use_nodejs
 	yarn install
 	yarn run production
-	
+
 	php$phpversion artisan setup:production --email=$email --password=$password  -n --force
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
