@@ -70,9 +70,32 @@ if [ -z "$final_path" ]; then
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
 
+# If dav_support doesn't exist, create it
+if [ -z "$dav_support" ]; then
+	dav_support=0
+	ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
+fi
+
+# If signup doesn't exist, create it
+if [ -z "$signup" ]; then
+	signup=0
+	ynh_app_setting_set --app=$app --key=signup --value=$signup
+fi
+
+# If signup doesn't exist, create it
+if [ -z "$two_factor" ]; then
+	two_factor=0
+	ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
+fi
+
 # Create a permission if needed
 if ! ynh_permission_exists --permission="api"; then
 	ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
+fi
+
+# Create a permission if needed
+if ! ynh_permission_exists --permission="dav"; then
+	ynh_permission_create --permission="dav" --url="/dav" --allowed="visitors" --show_tile="false" --protected="true"
 fi
 
 #=================================================
@@ -157,6 +180,7 @@ ynh_exec_warn_less ynh_composer_exec --phpversion="$phpversion" --workdir="$fina
 ynh_script_progression --message="Updating a configuration file..."
 
 config="$final_path/.env"
+db_user=$db_name
 
 # Enable or disable DAV support for users
 if [ $dav_support -eq 0 ]
@@ -195,7 +219,7 @@ ynh_script_progression --message="Deploying..."
 
 update-alternatives --set php /usr/bin/php$phpversion
 
-pushd "$final_path"	
+pushd "$final_path"
 	ynh_use_nodejs
 	yarn install
 	yarn run production

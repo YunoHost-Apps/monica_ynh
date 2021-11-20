@@ -236,9 +236,9 @@ then
 	ynh_permission_update --permission="main" --add="visitors"
 fi
 
-# Giver API permission to visitors
+# Give API permission to visitors
 ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
-# Giver DAV permission to visitors
+# Give DAV permission to visitors
 ynh_permission_create --permission="dav" --url="/dav" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
