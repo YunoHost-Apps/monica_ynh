@@ -8,6 +8,14 @@
     },
     "version": "3.5.0~ynh1",
     "url": "https://monicahq.com",
+    "upstream": {
+        "license": "GPL-3.0",
+        "website": "https://monicahq.com",
+        "demo": "https://demo.example.com",
+        "admindoc": "https://yunohost.org/packaging_apps",
+        "userdoc": "https://yunohost.org/apps",
+        "code": "https://some.forge.com/example/example"
+    },
     "license": "GPL-3.0",
     "maintainer": {
         "name": "Sebastian Gumprich",
