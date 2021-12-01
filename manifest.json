@@ -14,7 +14,7 @@
         "demo": "https://demo.example.com",
         "admindoc": "https://yunohost.org/packaging_apps",
         "userdoc": "https://yunohost.org/apps",
-        "code": "https://some.forge.com/example/example"
+        "code": "https://github.com/monicahq/monica"
     },
     "license": "GPL-3.0",
     "maintainer": {
