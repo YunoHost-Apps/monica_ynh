@@ -33,6 +33,7 @@ dav_support=$YNH_APP_ARG_DAV_SUPPORT
 signup=$YNH_APP_ARG_SIGNUP
 two_factor=$YNH_APP_ARG_TWO_FACTOR
 version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
+phpversion=$YNH_PHP_VERSION
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -61,6 +62,7 @@ ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
 ynh_app_setting_set --app=$app --key=signup --value=$signup
 ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
 ynh_app_setting_set --app=$app --key=version --value=$version
+ynh_app_setting_set --app=$app --key=phpversion --value=$phpversion
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -124,8 +126,7 @@ ynh_add_nginx_config
 ynh_script_progression --message="Configuring PHP-FPM..."
 
 # Create a dedicated PHP-FPM config
-ynh_add_fpm_config --usage=low --footprint=low --package="$extra_php_dependencies"
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+ynh_add_fpm_config --usage=low --footprint=low
 
 #=================================================
 # SPECIFIC SETUP
@@ -167,7 +168,7 @@ else
 	twof="No"
 fi
 
-ynh_add_config --template="../conf/.env" --destination="$config"
+ynh_add_config --template="../conf/.env" --destination="$final_path/.env"
 
 #=================================================
 # INSTALL COMPOSER DEPENDENCIES
@@ -206,8 +207,8 @@ popd
 
 update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
-chmod 400 "$config"
-chown $app:$app "$config"
+chmod 400 "$final_path/.env"
+chown $app:$app "$final_path/.env"
 
 #=================================================
 # INSTALL THE CRON FILE
