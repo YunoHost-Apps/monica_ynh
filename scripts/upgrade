@@ -71,6 +71,13 @@ if [ -z "$final_path" ]; then
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
 
+# Cleaning legacy permissions
+if ynh_legacy_permissions_exists; then
+	ynh_legacy_permissions_delete_all
+
+	ynh_app_setting_delete --app=$app --key=is_public
+fi
+
 # Create a permission if needed
 if ! ynh_permission_exists --permission="api"; then
 	ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
@@ -82,7 +89,7 @@ fi
 ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # CHECK VERSION NUMBER
@@ -98,21 +105,11 @@ previous_version="${version}"
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_script_progression --message="Upgrading source files..."
+	ynh_script_progression --message="Upgrading source files..." --time --weight=1
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	if git -C "$final_path" rev-parse --is-inside-work-tree` >/dev/null 2>/dev/null
-	then
-		pushd "$final_path"
-			git fetch
-			git checkout tags/$version
-		popd
-	else
-		ynh_setup_source --dest_dir="$final_path"
-	fi
-
+	ynh_setup_source --dest_dir="$final_path"
 fi
-ynh_app_setting_set --app=$app --key=version --value=$version
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
@@ -244,14 +241,6 @@ if ynh_version_gt "2.15.0" "${previous_version}" ; then
 fi
 
 update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
-
-#=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
-ynh_script_progression --message="Storing the config file checksum..."
-
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$config"
 
 chmod 400 "$config"
 chown $app:$app "$config"
