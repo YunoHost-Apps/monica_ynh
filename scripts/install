@@ -69,8 +69,6 @@ ynh_app_setting_set --app=$app --key=version --value=$version
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
 
-ynh_install_app_dependencies $pkg_dependencies
-
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
 ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ stable main" --package="yarn" --key="https://dl.yarnpkg.com/debian/pubkey.gpg"
 
@@ -186,7 +184,7 @@ pushd "$final_path"
 	ynh_use_nodejs
 	yarn install
 	yarn run production
-	
+
 	php$phpversion artisan setup:production --email=$email --password=$password  -n --force
 	php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
@@ -229,9 +227,9 @@ then
 	ynh_permission_update --permission="main" --add="visitors"
 fi
 
-# Giver API permission to visitors
+# Give API permission to visitors
 ynh_permission_create --permission="api" --url="/api" --allowed="visitors" --show_tile="false" --protected="true"
-# Giver DAV permission to visitors
+# Give DAV permission to visitors
 ynh_permission_create --permission="dav" --url="/dav" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
