@@ -31,7 +31,6 @@ Change the settings of the app by changing the values in `.env`
 ## Documentation and resources
 
 * Official app website: https://monicahq.com
-* Official user documentation: https://yunohost.org/apps
 * Official admin documentation: https://yunohost.org/packaging_apps
 * Upstream app code repository: https://github.com/monicahq/monica
 * YunoHost documentation for this app: https://yunohost.org/app_monica
