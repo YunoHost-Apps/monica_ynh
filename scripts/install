@@ -61,7 +61,6 @@ ynh_app_setting_set --app=$app --key=dav_support --value=$dav_support
 ynh_app_setting_set --app=$app --key=signup --value=$signup
 ynh_app_setting_set --app=$app --key=two_factor --value=$two_factor
 ynh_app_setting_set --app=$app --key=version --value=$version
-ynh_app_setting_set --app=$app --key=phpversion --value=$phpversion
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -174,7 +173,7 @@ ynh_add_config --template="../conf/.env" --destination="$final_path/.env"
 #=================================================
 ynh_script_progression --message="Installing Composer dependencies..."
 
-ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
+ynh_install_composer --install_args="--no-interaction --no-dev"
 
 #=================================================
 # DEPLOY
