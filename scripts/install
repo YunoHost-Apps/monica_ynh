@@ -184,8 +184,8 @@ update-alternatives --set php /usr/bin/php$phpversion
 
 pushd "$final_path"
 	ynh_use_nodejs
-	yarn install
-	yarn run production
+	ynh_exec_warn_less yarn install
+	ynh_exec_warn_less yarn run production
 
 	php$phpversion artisan setup:production --email=$email --password=$password  -n --force
 	php$phpversion artisan passport:client --password -n > key.txt
