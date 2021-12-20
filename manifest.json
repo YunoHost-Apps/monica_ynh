@@ -11,8 +11,6 @@
     "upstream": {
         "license": "GPL-3.0",
         "website": "https://monicahq.com",
-        "demo": "https://demo.example.com",
-        "admindoc": "https://yunohost.org/packaging_apps",
         "code": "https://github.com/monicahq/monica"
     },
     "license": "GPL-3.0",
