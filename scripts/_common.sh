@@ -25,7 +25,7 @@ php${YNH_PHP_VERSION}-imagick php${YNH_PHP_VERSION}-cli php${YNH_PHP_VERSION}-js
 #!/bin/bash
 
 read_json () {
-    sudo python3 -c "import sys, json;print(json.load(open('$1'))['$2'])"
+    python3 -c "import sys, json;print(json.load(open('$1'))['$2'])"
 }
 
 read_manifest () {
