@@ -26,7 +26,7 @@ admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
 random_key=$(ynh_string_random --length=32)
-email=$(ynh_user_get_info $admin 'mail')
+email=$(ynh_user_get_info --username=$admin --key=mail)
 password=$(ynh_string_random --length=10)
 dav_support=$YNH_APP_ARG_DAV_SUPPORT
 signup=$YNH_APP_ARG_SIGNUP
@@ -100,11 +100,6 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path"
 
-# git clone https://github.com/monicahq/monica.git $final_path
-# pushd "$final_path"
-# 	git checkout tags/$version
-# popd
-
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
@@ -155,7 +150,6 @@ else
 	sign="Yes"
 fi
 
-
 # Enable or disable two factor authentication support for  users
 if [ $two_factor -eq 1 ]
 then
@@ -166,7 +160,7 @@ else
 	twof="No"
 fi
 
-ynh_add_config --template="../conf/.env" --destination="$final_path/.env"
+ynh_add_config --template="../conf/.env" --destination="$config"
 
 #=================================================
 # INSTALL COMPOSER DEPENDENCIES
@@ -213,8 +207,9 @@ chown $app:$app "$final_path/.env"
 #=================================================
 ynh_script_progression --message="Installing the cron file..."
 
-echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
-mv -f /tmp/cron$app /etc/cron.d/$app
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+chown root: "/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # GENERIC FINALIZATION
