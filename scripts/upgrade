@@ -30,7 +30,6 @@ dav_support=$(ynh_app_setting_get --app=$app --key=dav_support)
 signup=$(ynh_app_setting_get --app=$app --key=signup)
 two_factor=$(ynh_app_setting_get --app=$app --key=two_factor)
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-version=$(curl -s https://api.github.com/repos/monicahq/monica/releases/latest | grep 'tag_name' | cut -d\" -f4)
 
 #=================================================
 # CHECK VERSION
@@ -114,14 +113,6 @@ ynh_script_progression --message="Making sure dedicated system user exists..."
 ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
-# CHECK VERSION NUMBER
-#=================================================
-
-abort_if_up_to_date
-# previous function is what defines 'version', more precisely the 'previous version'
-previous_version="${version}"
-
-#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
@@ -176,7 +167,7 @@ ynh_install_composer --install_args="--no-interaction --no-dev"
 #=================================================
 ynh_script_progression --message="Deploying..."
 
-update-alternatives --set php /usr/bin/php$phpversion
+#update-alternatives --set php /usr/bin/php$phpversion
 
 pushd "$final_path"
 	ynh_use_nodejs
