@@ -14,7 +14,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
 
-**Version incluse :** 2.17.0~ynh3
+**Version incluse :** 3.6.1~ynh1
 
 
 
@@ -28,10 +28,10 @@ Monica is an open-source web application to organize the interactions with your 
 
 ## Documentations et ressources
 
-* Site officiel de l'app : https://monicahq.com
-* Dépôt de code officiel de l'app : https://github.com/monicahq/monica
-* Documentation YunoHost pour cette app : https://yunohost.org/app_monica
-* Signaler un bug : https://github.com/YunoHost-Apps/monica_ynh/issues
+* Site officiel de l'app : https://monicahq.com
+* Dépôt de code officiel de l'app : https://github.com/monicahq/monica
+* Documentation YunoHost pour cette app : https://yunohost.org/app_monica
+* Signaler un bug : https://github.com/YunoHost-Apps/monica_ynh/issues
 
 ## Informations pour les développeurs
 
@@ -44,4 +44,4 @@ ou
 sudo yunohost app upgrade monica -u https://github.com/YunoHost-Apps/monica_ynh/tree/testing --debug
 ```
 
-**Plus d'infos sur le packaging d'applications :** https://yunohost.org/packaging_apps
+**Plus d'infos sur le packaging d'applications :** https://yunohost.org/packaging_apps

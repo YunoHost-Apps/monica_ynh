@@ -109,6 +109,8 @@ ynh_add_nginx_config
 ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
+ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ stable main" --package="yarn" --key="https://dl.yarnpkg.com/debian/pubkey.gpg"
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -127,6 +129,10 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 ynh_script_progression --message="Updating php dependencies..."
 
 ynh_exec_warn_less ynh_composer_exec --phpversion="$phpversion" --workdir="$final_path" --commands="update"
+
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # UPDATE A CONFIG FILE
@@ -150,8 +156,13 @@ ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --
 #=================================================
 ynh_script_progression --message="Deploying..."
 
+update-alternatives --set php /usr/bin/php$phpversion
+
 pushd "$final_path"
-	php$phpversion artisan monica:update --force
+	ynh_use_nodejs
+	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install
+	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn run production
+	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan setup:production --force
 popd
 
 if [ -f $final_path/storage/oauth-private.key ]; then
@@ -161,35 +172,35 @@ if [ -f $final_path/storage/oauth-private.key ]; then
 	ynh_replace_string --match_string="__MOBILE_KEY__" --replace_string="$mobile_key" --target_file="$config"
 else
 	pushd "$final_path"
-		php$phpversion artisan passport:keys
-		php$phpversion artisan passport:client --password -n > key.txt
+		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:keys
+		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
 		mobile_id=$( tail -2 key.txt | head -1 | cut -c 12- )
 		mobile_key=$( tail -1 key.txt | cut -c 16- )
 		ynh_replace_string --match_string="__MOBILE_ID__" --replace_string="$mobile_id"   --target_file="$config"
 		ynh_replace_string --match_string="__MOBILE_KEY__" --replace_string="$mobile_key"  --target_file="$config"
 		ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 		ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
-		rm -f key.txt
+		ynh_secure_remove --file="$final_path/key.txt"
 	popd
 fi
+pushd "$final_path"
+	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
+popd
 
 if ynh_version_gt "2.15.0" "${previous_version}" ; then
 	ynh_script_progression --message="Upgrading for 2.15.0..."
 	pushd "$final_path"
-		php$phpversion artisan monica:moveavatarstophotosdirectory
+		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan monica:moveavatarstophotosdirectory
 	popd
 fi
-
-#=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
-ynh_script_progression --message="Storing the config file checksum..."
 
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum --file="$config"
 
 chmod 400 "$config"
 chown $app:$app "$config"
+
+update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
 #=================================================
 # GENERIC FINALIZATION
