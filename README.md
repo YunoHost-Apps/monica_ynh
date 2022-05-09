@@ -21,6 +21,7 @@ Monica is an open-source web application to organize the interactions with your 
 **Shipped version:** 3.7.0~ynh1
 
 
+
 ## Screenshots
 
 ![](./doc/screenshots/screenshot1.png)
