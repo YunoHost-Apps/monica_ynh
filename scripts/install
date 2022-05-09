@@ -130,16 +130,7 @@ chown -R $app:www-data "$final_path"
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
 
-config="$final_path/.env"
-cp ../conf/.env "$config"
-
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="__RANDOM_KEY__" --replace_string="$random_key" --target_file="$config"
-ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__EMAIL__" --replace_string="$email" --target_file="$config"
-ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --target_file="$config"
+ynh_add_config --template="../conf/.env" --destination="$final_path/.env"
 
 #=================================================
 # DEPLOY
@@ -156,19 +147,16 @@ pushd "$final_path"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
-	ynh_replace_string  --match_string="__MOBILE_ID__"   --replace_string="$mobile_id"   --target_file="$config"
-	ynh_replace_string  --match_string="__MOBILE_KEY__"        --replace_string="$mobile_key"  --target_file="$config"
+	ynh_replace_string  --match_string="MOBILE_ID" --replace_string="$mobile_id" --target_file="$final_path/.env"
+	ynh_replace_string  --match_string="MOBILE_KEY" --replace_string="$mobile_key" --target_file="$final_path/.env"
 	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$final_path/key.txt"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
 popd
 
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$config"
-
-chmod 400 "$config"
-chown $app:$app "$config"
+chmod 400 "$final_path/.env"
+chown $app:$app "$final_path/.env"
 
 update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
