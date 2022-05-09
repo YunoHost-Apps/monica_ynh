@@ -25,8 +25,9 @@ path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 language=$YNH_APP_ARG_LANGUAGE
+password=$YNH_APP_ARG_PASSWORD
 random_key=$(ynh_string_random --length=32)
-email=$(ynh_user_get_info $admin 'mail')
+email=$(ynh_user_get_info --username=$admin --key="mail")
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -60,6 +61,8 @@ ynh_app_setting_set --app=$app --key=random_key --value=$random_key
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
+ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ stable main" --package="yarn" --key="https://dl.yarnpkg.com/debian/pubkey.gpg"
 
 #=================================================
 # CREATE DEDICATED USER
@@ -118,6 +121,10 @@ ynh_script_progression --message="Installing composer dependencies..."
 
 ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
 
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
+
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
@@ -139,10 +146,14 @@ ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --
 #=================================================
 ynh_script_progression --message="Deploying..."
 
+update-alternatives --set php /usr/bin/php$phpversion
+
 pushd "$final_path"
-	php$phpversion artisan monica:update --force
-	php$phpversion artisan passport:keys
-	php$phpversion artisan passport:client --password -n > key.txt
+	ynh_use_nodejs
+	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install
+	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn run production
+	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan setup:production --force --email=$email --password=$password
+	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 	ynh_replace_string  --match_string="__MOBILE_ID__"   --replace_string="$mobile_id"   --target_file="$config"
@@ -150,6 +161,7 @@ pushd "$final_path"
 	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$final_path/key.txt"
+	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
 popd
 
 # Calculate and store the config file checksum into the app settings
@@ -157,6 +169,8 @@ ynh_store_file_checksum --file="$config"
 
 chmod 400 "$config"
 chown $app:$app "$config"
+
+update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
 #=================================================
 # INSTALL THE CRON FILE

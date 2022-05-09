@@ -19,7 +19,7 @@
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">= 4.3.0"
+        "yunohost": ">= 11.0.0"
     },
     "multi_instance": true,
     "services": [
@@ -61,6 +61,10 @@
                 },
                 "choices": ["cs","de","en","es","fr","he","it","nl","pt","ru","zh"],
                 "default": "en"
+            },
+            {
+                "name": "password",
+                "type": "password"
             }
         ]
     }
