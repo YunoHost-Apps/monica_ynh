@@ -28,6 +28,7 @@ language=$YNH_APP_ARG_LANGUAGE
 password=$YNH_APP_ARG_PASSWORD
 random_key=$(ynh_string_random --length=32)
 email=$(ynh_user_get_info --username=$admin --key="mail")
+phpversion=$YNH_PHP_VERSION
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -119,7 +120,7 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 ynh_script_progression --message="Installing composer dependencies..."
 
-ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path" --install_args="--ignore-platform-req=ext-redis"
+ynh_exec_warn_less ynh_install_composer --install_args="--ignore-platform-req=ext-redis"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
@@ -130,14 +131,20 @@ chown -R $app:www-data "$final_path"
 #=================================================
 ynh_script_progression --message="Adding a configuration file..."
 
+mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
+mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
+
+ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
+ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
+
 ynh_add_config --template="../conf/.env" --destination="$final_path/.env"
+chmod 400 "$final_path/.env"
+chown $app:$app "$final_path/.env"
 
 #=================================================
 # DEPLOY
 #=================================================
 ynh_script_progression --message="Deploying..."
-
-update-alternatives --set php /usr/bin/php$phpversion
 
 pushd "$final_path"
 	ynh_use_nodejs
@@ -145,28 +152,18 @@ pushd "$final_path"
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn run production
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan setup:production --force --email=$email --password="$password"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
-	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
-	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
-	ynh_replace_string  --match_string="MOBILE_ID" --replace_string="$mobile_id" --target_file="$final_path/.env"
-	ynh_replace_string  --match_string="MOBILE_KEY" --replace_string="$mobile_key" --target_file="$final_path/.env"
-	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
-	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$final_path/key.txt"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
 popd
-
-chmod 400 "$final_path/.env"
-chown $app:$app "$final_path/.env"
-
-update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
 #=================================================
 # INSTALL THE CRON FILE
 #=================================================
 ynh_script_progression --message="Installing the cron file..."
 
-echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
-mv /tmp/cron$app /etc/cron.d/$app
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+chown root: "/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # GENERIC FINALIZATION

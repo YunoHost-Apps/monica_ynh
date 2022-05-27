@@ -70,9 +70,8 @@ chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
-config="$final_path/.env"
-chmod 400 "$config"
-chown $app:$app "$config"
+chmod 400 "$final_path/.env"
+chown $app:$app "$final_path/.env"
 
 #=================================================
 # SPECIFIC RESTORATION
