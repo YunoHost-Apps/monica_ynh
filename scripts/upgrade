@@ -119,7 +119,7 @@ phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 #=================================================
 ynh_script_progression --message="Updating php dependencies..."
 
-ynh_exec_warn_less ynh_composer_exec --install_args="--no-interaction --no-dev --ignore-platform-req=ext-redis"
+ynh_exec_warn_less ynh_composer_exec --phpversion="$phpversion" --install_args="--no-interaction --no-dev --ignore-platform-req=ext-redis"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
