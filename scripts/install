@@ -155,6 +155,9 @@ pushd "$final_path"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
 popd
 
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum --file="$final_path/.env"
+
 chmod 400 "$final_path/.env"
 chown $app:$app "$final_path/.env"
 
