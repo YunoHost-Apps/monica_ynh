@@ -10,7 +10,8 @@
     "upstream": {
         "license": "GPL-3.0",
         "website": "https://monicahq.com",
-        "code": "https://github.com/monicahq/monica"
+        "code": "https://github.com/monicahq/monica",
+        "cpe": "cpe:2.3:a:monicahq:monica"
     },
     "license": "GPL-3.0",
     "maintainer": {
@@ -59,7 +60,19 @@
                     "en": "Choose the application language",
                     "fr": "Choisissez la langue de l'application"
                 },
-                "choices": ["cs","de","en","es","fr","he","it","nl","pt","ru","zh"],
+                "choices": [
+                    "cs",
+                    "de",
+                    "en",
+                    "es",
+                    "fr",
+                    "he",
+                    "it",
+                    "nl",
+                    "pt",
+                    "ru",
+                    "zh"
+                ],
                 "default": "en"
             },
             {
