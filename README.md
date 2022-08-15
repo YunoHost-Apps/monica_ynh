@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Monica for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![Working status](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)  
 [![Install Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=monica)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -21,10 +21,9 @@ Monica is an open-source web application to organize the interactions with your 
 **Shipped version:** 3.6.1~ynh1
 
 
-
 ## Screenshots
 
-![](./doc/screenshots/screenshot1.png)
+![Screenshot of Monica](./doc/screenshots/screenshot1.png)
 
 ## Disclaimers / important information
 
@@ -34,20 +33,21 @@ Monica is an open-source web application to organize the interactions with your 
 
 ## Documentation and resources
 
-* Official app website: https://monicahq.com
-* Upstream app code repository: https://github.com/monicahq/monica
-* YunoHost documentation for this app: https://yunohost.org/app_monica
-* Report a bug: https://github.com/YunoHost-Apps/monica_ynh/issues
+* Official app website: <https://monicahq.com>
+* Upstream app code repository: <https://github.com/monicahq/monica>
+* YunoHost documentation for this app: <https://yunohost.org/app_monica>
+* Report a bug: <https://github.com/YunoHost-Apps/monica_ynh/issues>
 
 ## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/monica_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
-```
+
+``` bash
 sudo yunohost app install https://github.com/YunoHost-Apps/monica_ynh/tree/testing --debug
 or
 sudo yunohost app upgrade monica -u https://github.com/YunoHost-Apps/monica_ynh/tree/testing --debug
 ```
 
-**More info regarding app packaging:** https://yunohost.org/packaging_apps
+**More info regarding app packaging:** <https://yunohost.org/packaging_apps>
