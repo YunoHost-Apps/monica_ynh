@@ -18,7 +18,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
 
-**Shipped version:** 2.17.0~ynh3
+**Shipped version:** 3.6.1~ynh1
 
 
 
@@ -28,7 +28,9 @@ Monica is an open-source web application to organize the interactions with your 
 
 ## Disclaimers / important information
 
-* **First User Registration:** Visit the app **domain** after the installation is complete to register as **first user**. After the first user is registered the registration will be **locked**. You can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
+* You can connect using the email address of the user choosen during the installation and password provided during the installation
+* New registrations are disabled, you can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**.
+* There is **no admin interface** in the Monica app currently.
 
 ## Documentation and resources
 
