@@ -79,7 +79,7 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=1
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$final_path" --keep=".env"
 fi
 
 chmod 750 "$final_path"
@@ -119,7 +119,7 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Updating php dependencies..."
 
-ynh_exec_warn_less ynh_composer_exec --phpversion="$phpversion" --workdir="$final_path" --commands="update"
+ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
