@@ -121,6 +121,7 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Updating php dependencies..."
 
+ynh_secure_remove --file="$final_path/vendor"
 ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
 
 chmod 750 "$final_path"
