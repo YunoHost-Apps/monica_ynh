@@ -5,12 +5,13 @@
     "description": {
         "en": " Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family."
     },
-    "version": "2.17.0~ynh3",
+    "version": "3.6.1~ynh1",
     "url": "https://monicahq.com",
     "upstream": {
         "license": "GPL-3.0",
         "website": "https://monicahq.com",
-        "code": "https://github.com/monicahq/monica"
+        "code": "https://github.com/monicahq/monica",
+        "cpe": "cpe:2.3:a:monicahq:monica"
     },
     "license": "GPL-3.0",
     "maintainer": {
@@ -19,12 +20,12 @@
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">= 4.3.0"
+        "yunohost": ">= 11.0.0"
     },
     "multi_instance": true,
     "services": [
         "nginx",
-        "php7.3-fpm",
+        "php7.4-fpm",
         "mysql"
     ],
     "arguments": {
@@ -38,10 +39,6 @@
                 "type": "path",
                 "example": "/monica",
                 "default": "/monica"
-            },
-            {
-                "name": "admin",
-                "type": "user"
             },
             {
                 "name": "is_public",
@@ -59,8 +56,28 @@
                     "en": "Choose the application language",
                     "fr": "Choisissez la langue de l'application"
                 },
-                "choices": ["cs","de","en","es","fr","he","it","nl","pt","ru","zh"],
+                "choices": [
+                    "cs",
+                    "de",
+                    "en",
+                    "es",
+                    "fr",
+                    "he",
+                    "it",
+                    "nl",
+                    "pt",
+                    "ru",
+                    "zh"
+                ],
                 "default": "en"
+            },
+            {
+                "name": "admin",
+                "type": "user"
+            },
+            {
+                "name": "password",
+                "type": "password"
             }
         ]
     }

@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Monica for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![Working status](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)  
 [![Install Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=monica)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -18,34 +18,36 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
 
-**Shipped version:** 2.17.0~ynh3
-
+**Shipped version:** 3.6.1~ynh1
 
 
 ## Screenshots
 
-![](./doc/screenshots/screenshot1.png)
+![Screenshot of Monica](./doc/screenshots/screenshot1.png)
 
 ## Disclaimers / important information
 
-* **First User Registration:** Visit the app **domain** after the installation is complete to register as **first user**. After the first user is registered the registration will be **locked**. You can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**. There is **no admin interface** in the Monica app currently.
+* You can connect using the email address of the user choosen during the installation and password provided during the installation
+* New registrations are disabled, you can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**.
+* There is **no admin interface** in the Monica app currently.
 
 ## Documentation and resources
 
-* Official app website: https://monicahq.com
-* Upstream app code repository: https://github.com/monicahq/monica
-* YunoHost documentation for this app: https://yunohost.org/app_monica
-* Report a bug: https://github.com/YunoHost-Apps/monica_ynh/issues
+* Official app website: <https://monicahq.com>
+* Upstream app code repository: <https://github.com/monicahq/monica>
+* YunoHost documentation for this app: <https://yunohost.org/app_monica>
+* Report a bug: <https://github.com/YunoHost-Apps/monica_ynh/issues>
 
 ## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/monica_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
-```
+
+``` bash
 sudo yunohost app install https://github.com/YunoHost-Apps/monica_ynh/tree/testing --debug
 or
 sudo yunohost app upgrade monica -u https://github.com/YunoHost-Apps/monica_ynh/tree/testing --debug
 ```
 
-**More info regarding app packaging:** https://yunohost.org/packaging_apps
+**More info regarding app packaging:** <https://yunohost.org/packaging_apps>
