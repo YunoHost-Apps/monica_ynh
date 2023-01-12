@@ -3,7 +3,7 @@
     "id": "monica",
     "packaging_format": 1,
     "description": {
-        "en": " Personal Relationship Manager - a new kind of CRM to organize interactions with your friends and family."
+        "en": "Personal Relationship Manager"
     },
     "version": "3.7.0~ynh1",
     "url": "https://monicahq.com",
