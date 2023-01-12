@@ -20,7 +20,6 @@ Monica is an open-source web application to organize the interactions with your 
 
 **Shipped version:** 3.7.0~ynh1
 
-
 ## Screenshots
 
 ![Screenshot of Monica](./doc/screenshots/screenshot1.png)
@@ -30,6 +29,10 @@ Monica is an open-source web application to organize the interactions with your 
 * You can connect using the email address of the user choosen during the installation and password provided during the installation
 * New registrations are disabled, you can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**.
 * There is **no admin interface** in the Monica app currently.
+
+## :red_circle: Antifeatures
+
+- **Package not maintained**: This YunoHost package is not maintained and needs adoption.
 
 ## Documentation and resources
 
