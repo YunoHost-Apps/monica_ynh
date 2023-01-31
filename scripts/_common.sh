@@ -13,7 +13,7 @@ php_dependencies="php${YNH_PHP_VERSION}-bcmath php${YNH_PHP_VERSION}-cli php${YN
 # dependencies used by the app (must be on a single line)
 pkg_dependencies="$php_dependencies"
 
-NODEJS_VERSION=16
+NODEJS_VERSION=18
 
 #=================================================
 # PERSONAL HELPERS
