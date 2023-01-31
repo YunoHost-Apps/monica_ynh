@@ -3,7 +3,8 @@
     "id": "monica",
     "packaging_format": 1,
     "description": {
-        "en": "Personal Relationship Manager"
+        "en": "Personal Relationship Manager",
+        "fr": "Gestionnaire de relations personnelles"
     },
     "version": "4.0.0~ynh1",
     "url": "https://monicahq.com",
@@ -20,7 +21,7 @@
         "url": "http://github.com/rndmh3ro/monica_ynh"
     },
     "requirements": {
-        "yunohost": ">= 11.0.0"
+        "yunohost": ">= 11.0.9"
     },
     "multi_instance": true,
     "services": [
