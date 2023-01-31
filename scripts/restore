@@ -34,6 +34,9 @@ db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_user=$db_name
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
+fpm_footprint=$(ynh_app_setting_get --app=$app --key=fpm_footprint)
+fpm_usage=$(ynh_app_setting_get --app=$app --key=fpm_usage)
+
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
@@ -63,10 +66,6 @@ chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
-config="$final_path/.env"
-chmod 400 "$config"
-chown $app:$app "$config"
-
 #=================================================
 # SPECIFIC RESTORATION
 #=================================================
@@ -85,6 +84,9 @@ ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ st
 ynh_script_progression --message="Restoring the PHP-FPM configuration..."
 
 ynh_restore_file --origin_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
+
+# Recreate a dedicated php-fpm config
+ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint --phpversion=$phpversion
 
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
