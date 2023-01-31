@@ -160,7 +160,7 @@ pushd "$final_path"
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
 	ynh_replace_string  --match_string="__MOBILE_ID__"   --replace_string="$mobile_id"   --target_file="$final_path/.env"
-	ynh_replace_string  --match_string="__MOBILE_KEY__"        --replace_string="$mobile_key"  --target_file="$final_path/.env"
+	ynh_replace_string  --match_string="__MOBILE_KEY__"  --replace_string="$mobile_key"  --target_file="$final_path/.env"
 	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$final_path/key.txt"
