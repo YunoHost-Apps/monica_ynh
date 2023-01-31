@@ -31,6 +31,9 @@ app=$YNH_APP_INSTANCE_NAME
 
 random_key=$(ynh_string_random --length=32)
 email=$(ynh_user_get_info --username=$admin --key="mail")
+fpm_footprint="low"
+fpm_free_footprint=0
+fpm_usage="low"
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -53,6 +56,9 @@ ynh_app_setting_set --app=$app --key=path --value=$path_url
 ynh_app_setting_set --app=$app --key=language --value=$language
 ynh_app_setting_set --app=$app --key=admin --value=$admin
 ynh_app_setting_set --app=$app --key=random_key --value=$random_key
+ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
+ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
+ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -102,7 +108,7 @@ chown -R $app:www-data "$final_path"
 ynh_script_progression --message="Configuring PHP-FPM..." --weight=1
 
 # Create a dedicated PHP-FPM config
-ynh_add_fpm_config
+ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
@@ -132,15 +138,11 @@ chown -R $app:www-data "$final_path"
 ynh_script_progression --message="Adding a configuration file..." --weight=1
 
 config="$final_path/.env"
-cp ../conf/.env "$config"
 
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="__RANDOM_KEY__" --replace_string="$random_key" --target_file="$config"
-ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_user" --target_file="$config"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__EMAIL__" --replace_string="$email" --target_file="$config"
-ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --target_file="$config"
+ynh_add_config --template=../conf/.env --destination=$final_path/.env
+
+chmod 600 $final_path/.env
+chown $app:$app $final_path/.env
 
 #=================================================
 # DEPLOY
@@ -157,8 +159,8 @@ pushd "$final_path"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $final_path && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $final_path && tail -1 key.txt | cut -c 16- )
-	ynh_replace_string  --match_string="__MOBILE_ID__"   --replace_string="$mobile_id"   --target_file="$config"
-	ynh_replace_string  --match_string="__MOBILE_KEY__"        --replace_string="$mobile_key"  --target_file="$config"
+	ynh_replace_string  --match_string="__MOBILE_ID__"   --replace_string="$mobile_id"   --target_file="$final_path/.env"
+	ynh_replace_string  --match_string="__MOBILE_KEY__"        --replace_string="$mobile_key"  --target_file="$final_path/.env"
 	ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$final_path/key.txt"
@@ -166,20 +168,22 @@ pushd "$final_path"
 popd
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$config"
+ynh_store_file_checksum --file="$final_path/.env"
 
-chmod 400 "$config"
-chown $app:$app "$config"
+chmod 400 "$final_path/.env"
+chown $app:$app "$final_path/.env"
 
 update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
 #=================================================
 # INSTALL THE CRON FILE
 #=================================================
-ynh_script_progression --message="Installing the cron file..."
+ynh_script_progression --message="Setuping a cron..." --weight=1
 
-echo "* * * * * -u $app /usr/bin/php$phpversion $final_path/artisan schedule:run" > /tmp/cron$app
-mv /tmp/cron$app /etc/cron.d/$app
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+
+chown root: "/etc/cron.d/$app"
+chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # GENERIC FINALIZATION
