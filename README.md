@@ -22,7 +22,7 @@ Monica is an open-source web application to organize the interactions with your 
 
 ## Screenshots
 
-![Screenshot of Monica](./doc/screenshots/screenshot1.png)
+![Screenshot of Monica](./doc/screenshots/main-app.png)
 
 ## Disclaimers / important information
 
