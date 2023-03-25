@@ -6,6 +6,7 @@ It shall NOT be edited by hand.
 # Monica pour YunoHost
 
 [![Niveau d’intégration](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)
+
 [![Installer Monica avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=monica)
 
 *[Read this readme in english.](./README.md)*
