@@ -52,7 +52,7 @@ ram.runtime = "50M"
 [resources]
 
     [resources.sources]
-    
+
         [resources.sources.main]
         url = "https://github.com/monicahq/monica/archive/v4.0.0.zip"
         sha256 = "5b108525a2f5fedc0a2bb82a49d3de47d087b33082fb21e64f874d387304ed9f"
@@ -67,9 +67,9 @@ ram.runtime = "50M"
     [resources.apt]
     packages = "mariadb-server php8.1-bcmath php8.1-cli php8.1-curl php8.1-dom php8.1-gd php8.1-gmp php8.1-iconv php8.1-intl php8.1-mbstring php8.1-mysql php8.1-mysqli php8.1-opcache php8.1-redis php8.1-xml php8.1-zip"
 
-    extras.repo = "deb https://dl.yarnpkg.com/debian/ stable main"
-    extras.key = "https://dl.yarnpkg.com/debian/pubkey.gpg"
-    extras.packages = "yarn"
+    extras.yarn.repo = "deb https://dl.yarnpkg.com/debian/ stable main"
+    extras.yarn.key = "https://dl.yarnpkg.com/debian/pubkey.gpg"
+    extras.yarn.packages = "yarn"
 
     [resources.database]
     type = "mysql"
