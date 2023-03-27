@@ -50,6 +50,9 @@ ram.runtime = "50M"
     type = "password"
 
 [resources]
+
+    [resources.sources]
+    
         [resources.sources.main]
         url = "https://github.com/monicahq/monica/archive/v4.0.0.zip"
         sha256 = "5b108525a2f5fedc0a2bb82a49d3de47d087b33082fb21e64f874d387304ed9f"
