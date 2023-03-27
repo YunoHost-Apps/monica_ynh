@@ -12,47 +12,14 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-#REMOVEME? ynh_script_progression --message="Loading installation settings..." --weight=1
 
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
-
-#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
-#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
-#REMOVEME? language=$(ynh_app_setting_get --app=$app --key=language)
-#REMOVEME? admin=$(ynh_app_setting_get --app=$app --key=admin)
-#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
-#REMOVEME? db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-#REMOVEME? db_user=$db_name
-#REMOVEME? db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
-#REMOVEME? random_key=$(ynh_app_setting_get --app=$app --key=random_key)
 email=$(ynh_user_get_info --username=$admin --key=mail)
-#REMOVEME? phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-
-#REMOVEME? fpm_footprint=$(ynh_app_setting_get --app=$app --key=fpm_footprint)
-#REMOVEME? fpm_free_footprint=$(ynh_app_setting_get --app=$app --key=fpm_free_footprint)
-#REMOVEME? fpm_usage=$(ynh_app_setting_get --app=$app --key=fpm_usage)
 
 #=================================================
 # CHECK VERSION
 #=================================================
 
 upgrade_type=$(ynh_check_app_version_changed)
-
-#REMOVEME? previous_version=$(read_json "/etc/yunohost/apps/$YNH_APP_INSTANCE_NAME/manifest.json" 'version' 2> /dev/null)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=1
-
-# Backup the current version of the app
-#REMOVEME? ynh_backup_before_upgrade
-#REMOVEME? ynh_clean_setup () {
-	# Restore it if the upgrade fails
-#REMOVEME? 	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -79,21 +46,6 @@ if [ -z "$fpm_usage" ]; then
     ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
 fi
 
-# Cleaning legacy permissions
-#REMOVEME? if ynh_legacy_permissions_exists; then
-#REMOVEME? 	ynh_legacy_permissions_delete_all
-
-	ynh_app_setting_delete --app=$app --key=is_public
-fi
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-#REMOVEME? ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
-
-# Create a dedicated user (if not existing)
-#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
-
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -106,18 +58,15 @@ then
 	ynh_setup_source --dest_dir="$install_dir" --keep=".env"
 fi
 
-chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
 
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-#REMOVEME? ynh_script_progression --message="Upgrading dependencies..." --weight=1
+ynh_script_progression --message="Upgrading dependencies..." --weight=1
 
-#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
-#REMOVEME? ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ stable main" --package="yarn" --key="https://dl.yarnpkg.com/debian/pubkey.gpg"
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -126,7 +75,6 @@ ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=1
 
 # Create a dedicated PHP-FPM config
 ynh_add_fpm_config --phpversion=$phpversion --usage=$fpm_usage --footprint=$fpm_footprint
-#REMOVEME? phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
 # NGINX CONFIGURATION
@@ -141,9 +89,9 @@ ynh_add_nginx_config
 #=================================================
 # UPDATE PHP DEPENDENCIES
 #=================================================
-#REMOVEME? ynh_script_progression --message="Updating php dependencies..."
+ynh_script_progression --message="Updating php dependencies..."
 
-#REMOVEME? ynh_secure_remove --file="$install_dir/vendor"
+ynh_secure_remove --file="$install_dir/vendor"
 ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$install_dir"
 
 chmod 750 "$install_dir"
@@ -174,8 +122,8 @@ pushd "$install_dir"
 popd
 
 if [ -f $install_dir/storage/oauth-private.key ]; then
-#REMOVEME? 	mobile_id=$(ynh_app_setting_get --app=$app --key=mobile_id)
-#REMOVEME? 	mobile_key=$(ynh_app_setting_get --app=$app --key=mobile_key)
+	mobile_id=$(ynh_app_setting_get --app=$app --key=mobile_id)
+	mobile_key=$(ynh_app_setting_get --app=$app --key=mobile_key)
 	ynh_replace_string --match_string="mobile_id" --replace_string="$mobile_id" --target_file="$install_dir/.env"
 	ynh_replace_string --match_string="mobile_key" --replace_string="$mobile_key" --target_file="$install_dir/.env"
 else
@@ -188,7 +136,7 @@ else
 		ynh_replace_string --match_string="mobile_key" --replace_string="$mobile_key"  --target_file="$install_dir/.env"
 		ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 		ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
-#REMOVEME? 		ynh_secure_remove --file="$install_dir/key.txt"
+		ynh_secure_remove --file="$install_dir/key.txt"
 	popd
 fi
 pushd "$install_dir"
@@ -209,15 +157,6 @@ chmod 400 "$install_dir/.env"
 chown $app:$app "$install_dir/.env"
 
 update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# RELOAD NGINX
-#=================================================
-#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..." --weight=1
-
-#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
