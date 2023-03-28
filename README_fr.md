@@ -6,6 +6,7 @@ It shall NOT be edited by hand.
 # Monica pour YunoHost
 
 [![Niveau d’intégration](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)
+
 [![Installer Monica avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=monica)
 
 *[Read this readme in english.](./README.md)*
@@ -18,17 +19,11 @@ Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) po
 Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
 
-**Version incluse :** 3.7.0~ynh2
+**Version incluse :** 4.0.0~ynh1
 
 ## Captures d’écran
 
-![Capture d’écran de Monica](./doc/screenshots/screenshot1.png)
-
-## Avertissements / informations importantes
-
-* You can connect using the email address of the user choosen during the installation and password provided during the installation
-* New registrations are disabled, you can open the register for all by changing the value **APP_DISABLE_SIGNUP** to **false** in **.env**.
-* There is **no admin interface** in the Monica app currently.
+![Capture d’écran de Monica](./doc/screenshots/main-app.png)
 
 ## :red_circle: Fonctions indésirables
 

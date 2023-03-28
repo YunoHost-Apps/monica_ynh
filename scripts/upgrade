@@ -12,43 +12,14 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=1
 
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-language=$(ynh_app_setting_get --app=$app --key=language)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
-random_key=$(ynh_app_setting_get --app=$app --key=random_key)
 email=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
 # CHECK VERSION
 #=================================================
-ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
-
-previous_version=$(read_json "/etc/yunohost/apps/$YNH_APP_INSTANCE_NAME/manifest.json" 'version' 2> /dev/null)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=1
-
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -57,20 +28,23 @@ ynh_abort_if_errors
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
-# Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
-
-	ynh_app_setting_delete --app=$app --key=is_public
+# If fpm_footprint doesn't exist, create it
+if [ -z "${fpm_footprint:-}" ]; then
+    fpm_footprint=low
+    ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
 fi
 
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
+# If fpm_free_footprint doesn't exist, create it
+if [ -z "${fpm_free_footprint:-}" ]; then
+    fpm_free_footprint=0
+    ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
+fi
 
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
+# If fpm_usage doesn't exist, create it
+if [ -z "${fpm_usage:-}" ]; then
+    fpm_usage=low
+    ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
+fi
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -81,21 +55,18 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=1
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path" --keep=".env"
+	ynh_setup_source --dest_dir="$install_dir" --keep=".env"
 fi
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
 ynh_script_progression --message="Upgrading dependencies..." --weight=1
 
-ynh_install_app_dependencies $pkg_dependencies
 ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
-ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ stable main" --package="yarn" --key="https://dl.yarnpkg.com/debian/pubkey.gpg"
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -103,8 +74,7 @@ ynh_install_extra_app_dependencies --repo="deb https://dl.yarnpkg.com/debian/ st
 ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=1
 
 # Create a dedicated PHP-FPM config
-ynh_add_fpm_config
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+ynh_add_fpm_config --phpversion=$phpversion --usage=$fpm_usage --footprint=$fpm_footprint
 
 #=================================================
 # NGINX CONFIGURATION
@@ -121,29 +91,21 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Updating php dependencies..."
 
-ynh_secure_remove --file="$final_path/vendor"
-ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$final_path"
+ynh_secure_remove --file="$install_dir/vendor"
+ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$install_dir"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
 ynh_script_progression --message="Updating a configuration file..." --weight=1
 
-config="$final_path/.env"
-ynh_backup_if_checksum_is_different --file="$config"
-cp ../conf/.env "$config"
+ynh_backup_if_checksum_is_different --file="$install_dir/.env"
 
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="__RANDOM_KEY__" --replace_string="$random_key" --target_file="$config"
-ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__EMAIL__" --replace_string="$email" --target_file="$config"
-ynh_replace_string --match_string="__LANGUAGE__" --replace_string="$language" --target_file="$config"
+ynh_add_config --template=../conf/.env --destination=$install_dir/.env
 
 #=================================================
 # DEPLOYMENT
@@ -152,58 +114,49 @@ ynh_script_progression --message="Deploying..."
 
 update-alternatives --set php /usr/bin/php$phpversion
 
-pushd "$final_path"
+pushd "$install_dir"
 	ynh_use_nodejs
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn run production
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan monica:update --force
 popd
 
-if [ -f $final_path/storage/oauth-private.key ]; then
+if [ -f $install_dir/storage/oauth-private.key ]; then
 	mobile_id=$(ynh_app_setting_get --app=$app --key=mobile_id)
 	mobile_key=$(ynh_app_setting_get --app=$app --key=mobile_key)
-	ynh_replace_string --match_string="__MOBILE_ID__" --replace_string="$mobile_id" --target_file="$config"
-	ynh_replace_string --match_string="__MOBILE_KEY__" --replace_string="$mobile_key" --target_file="$config"
+	ynh_replace_string --match_string="mobile_id" --replace_string="$mobile_id" --target_file="$install_dir/.env"
+	ynh_replace_string --match_string="mobile_key" --replace_string="$mobile_key" --target_file="$install_dir/.env"
 else
-	pushd "$final_path"
+	pushd "$install_dir"
 		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:keys
 		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
 		mobile_id=$( tail -2 key.txt | head -1 | cut -c 12- )
 		mobile_key=$( tail -1 key.txt | cut -c 16- )
-		ynh_replace_string --match_string="__MOBILE_ID__" --replace_string="$mobile_id"   --target_file="$config"
-		ynh_replace_string --match_string="__MOBILE_KEY__" --replace_string="$mobile_key"  --target_file="$config"
+		ynh_replace_string --match_string="mobile_id" --replace_string="$mobile_id"   --target_file="$install_dir/.env"
+		ynh_replace_string --match_string="mobile_key" --replace_string="$mobile_key"  --target_file="$install_dir/.env"
 		ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
 		ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
-		ynh_secure_remove --file="$final_path/key.txt"
+		ynh_secure_remove --file="$install_dir/key.txt"
 	popd
 fi
-pushd "$final_path"
+pushd "$install_dir"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
 popd
 
-if ynh_version_gt "2.15.0" "${previous_version}" ; then
-	ynh_script_progression --message="Upgrading for 2.15.0..."
-	pushd "$final_path"
-		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan monica:moveavatarstophotosdirectory
-	popd
-fi
+#if ynh_version_gt "2.15.0" "${previous_version}" ; then
+#	ynh_script_progression --message="Upgrading for 2.15.0..."
+#	pushd "$install_dir"
+#		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan monica:moveavatarstophotosdirectory
+#	popd
+#fi
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$config"
+ynh_store_file_checksum --file="$install_dir/.env"
 
-chmod 400 "$config"
-chown $app:$app "$config"
+chmod 400 "$install_dir/.env"
+chown $app:$app "$install_dir/.env"
 
 update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..." --weight=1
-
-ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
