@@ -15,7 +15,7 @@ website = "https://monicahq.com"
 code = "https://github.com/monicahq/monica"
 
 [integration]
-yunohost = ">= 11.1.15"
+yunohost = ">= 11.1.17"
 architectures = "all"
 multi_instance = true
 ldap =  false
