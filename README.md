@@ -25,15 +25,11 @@ Monica is an open-source web application to organize the interactions with your 
 
 ![Screenshot of Monica](./doc/screenshots/main-app.png)
 
-## :red_circle: Antifeatures
-
-- **Package not maintained**: This YunoHost package is not maintained and needs adoption.
-
 ## Documentation and resources
 
 * Official app website: <https://monicahq.com>
 * Upstream app code repository: <https://github.com/monicahq/monica>
-* YunoHost documentation for this app: <https://yunohost.org/app_monica>
+* YunoHost Store: <https://apps.yunohost.org/app/monica>
 * Report a bug: <https://github.com/YunoHost-Apps/monica_ynh/issues>
 
 ## Developer info
