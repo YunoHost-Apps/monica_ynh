@@ -15,7 +15,7 @@ website = "https://monicahq.com"
 code = "https://github.com/monicahq/monica"
 
 [integration]
-yunohost = ">= 11.1.15"
+yunohost = ">= 11.2"
 architectures = "all"
 multi_instance = true
 ldap =  false
@@ -39,7 +39,7 @@ ram.runtime = "50M"
     [install.language]
     ask.en = "Choose the application language"
     ask.fr = "Choisissez la langue de l'application"
-    type = "string"
+    type = "select"
     choices = ["cs", "de", "en", "es", "fr", "he", "it", "nl", "pt", "ru", "zh"]
     default = "en"
 
@@ -66,7 +66,7 @@ ram.runtime = "50M"
     main.url = "/"
 
     [resources.apt]
-    packages = "mariadb-server php8.1-bcmath php8.1-cli php8.1-curl php8.1-dom php8.1-gd php8.1-gmp php8.1-iconv php8.1-intl php8.1-mbstring php8.1-mysql php8.1-mysqli php8.1-opcache php8.1-redis php8.1-xml php8.1-zip"
+    packages = "mariadb-server, php8.1-bcmath, php8.1-cli, php8.1-curl, php8.1-dom, php8.1-gd, php8.1-gmp, php8.1-iconv, php8.1-intl, php8.1-mbstring, php8.1-mysql, php8.1-mysqli, php8.1-opcache, php8.1-redis, php8.1-xml, php8.1-zip"
 
     extras.yarn.repo = "deb https://dl.yarnpkg.com/debian/ stable main"
     extras.yarn.key = "https://dl.yarnpkg.com/debian/pubkey.gpg"
