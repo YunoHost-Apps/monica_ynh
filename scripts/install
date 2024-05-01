@@ -86,8 +86,6 @@ chown $app:$app $install_dir/.env
 #=================================================
 ynh_script_progression --message="Deploying..."
 
-update-alternatives --set php /usr/bin/php$phpversion
-
 pushd "$install_dir"
 	ynh_use_nodejs
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install
@@ -109,8 +107,6 @@ ynh_store_file_checksum --file="$install_dir/.env"
 
 chmod 400 "$install_dir/.env"
 chown $app:$app "$install_dir/.env"
-
-update-alternatives --set php /usr/bin/php${YNH_DEFAULT_PHP_VERSION}
 
 #=================================================
 # INSTALL THE CRON FILE
