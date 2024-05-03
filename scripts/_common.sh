@@ -4,7 +4,7 @@
 # COMMON VARIABLES
 #=================================================
 
-#REMOVEME? YNH_PHP_VERSION="8.1"
+phpversion="8.1"
 
 YNH_COMPOSER_VERSION="2.5.1"
 
