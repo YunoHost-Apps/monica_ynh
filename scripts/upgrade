@@ -102,6 +102,13 @@ ynh_backup_if_checksum_is_different --file="$install_dir/.env"
 
 ynh_add_config --template=".env" --destination="$install_dir/.env"
 
+#==================================================
+# FIX PHP VERSION
+#==================================================
+ynh_script_progression --message="Fixing php version in package.json..." --weight=1
+
+ynh_replace_string --target_file="$install_dir/package.json" --match_string="php artisan lang:generate -vvv" --replace_string="php$phpversion artisan lang:generate -vvv"
+
 #=================================================
 # DEPLOYMENT
 #=================================================
