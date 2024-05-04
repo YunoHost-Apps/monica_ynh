@@ -5,7 +5,7 @@ name = "Monica"
 description.en = "Personal Relationship Manager"
 description.fr = "Gestionnaire de relations personnelles"
 
-version = "4.0.0~ynh3"
+version = "4.1.1~ynh1"
 
 maintainers = ["Sebastian Gumprich"]
 
@@ -54,8 +54,8 @@ ram.runtime = "50M"
     [resources.sources]
 
         [resources.sources.main]
-        url = "https://github.com/monicahq/monica/archive/v4.0.0.zip"
-        sha256 = "5b108525a2f5fedc0a2bb82a49d3de47d087b33082fb21e64f874d387304ed9f"
+        url = "https://github.com/monicahq/monica/archive/refs/tags/v4.1.1.tar.gz"
+        sha256 = "45ec09d9e746bb820a764264d1af5a8872bdd4a6f827b51069365d130965d43e"
         autoupdate.strategy = "latest_github_tag"
         
     [resources.system_user]
