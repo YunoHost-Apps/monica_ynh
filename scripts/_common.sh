@@ -8,7 +8,7 @@
 
 YNH_COMPOSER_VERSION="2.5.1"
 
-NODEJS_VERSION=18
+NODEJS_VERSION=20
 
 #=================================================
 # PERSONAL HELPERS
