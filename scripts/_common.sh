@@ -4,11 +4,11 @@
 # COMMON VARIABLES
 #=================================================
 
-phpversion="8.1"
+phpversion="8.2"
 
-YNH_COMPOSER_VERSION="2.5.1"
+YNH_COMPOSER_VERSION="2.6.5"
 
-NODEJS_VERSION=18
+NODEJS_VERSION=20
 
 #=================================================
 # PERSONAL HELPERS
