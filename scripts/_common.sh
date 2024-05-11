@@ -4,8 +4,6 @@
 # COMMON VARIABLES
 #=================================================
 
-phpversion="8.2"
-
 YNH_COMPOSER_VERSION="2.6.5"
 
 NODEJS_VERSION=20
