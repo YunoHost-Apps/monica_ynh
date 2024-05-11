@@ -1,0 +1,1 @@
+Monica est une application web open source pour organiser les interactions avec vos proches. J'appelle cela Gestion des Relations Personnelles. Considérez-le comme un [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (un outil populaire utilisé par les équipes commerciales du monde de l'entreprise) pour vos amis ou votre famille.
