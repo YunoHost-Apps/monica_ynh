@@ -36,7 +36,7 @@ ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading PHP-FPM configuration..." --weight=1
+ynh_script_progression --message="Updating $app's configuration files..." --weight=1
 
 # Create a dedicated PHP-FPM config
 ynh_add_fpm_config
