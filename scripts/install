@@ -57,7 +57,7 @@ ynh_add_nginx_config
 #=================================================
 # INSTALL COMPOSER DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing composer dependencies..."
+ynh_script_progression --message="Installing Composer dependencies..."
 
 ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --composerversion="$YNH_COMPOSER_VERSION" --workdir="$install_dir"
 
