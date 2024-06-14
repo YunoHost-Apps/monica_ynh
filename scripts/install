@@ -89,6 +89,7 @@ ynh_script_progression --message="Deploying $app..."
 
 pushd "$install_dir"
 	ynh_use_nodejs
+        yarn cache clean
         ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH APP_ENV=local yarn add moment-locales-webpack-plugin
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH NODE_ENV=production APP_ENV=local yarn install --production
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH NODE_ENV=production APP_ENV=local yarn run production
