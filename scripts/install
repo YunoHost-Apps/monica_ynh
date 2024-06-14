@@ -89,7 +89,7 @@ ynh_script_progression --message="Deploying $app..."
 
 pushd "$install_dir"
 	ynh_use_nodejs
-        ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH ynh_npm install moment-locales-webpack-plugin
+        ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH $ynh_npm install moment-locales-webpack-plugin
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install --production
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn run production
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan setup:production --force --email=$email --password=$password
