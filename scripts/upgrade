@@ -38,6 +38,8 @@ ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
 #=================================================
 ynh_script_progression --message="Updating $app's configuration files..." --weight=1
 
+ynh_add_fpm_config
+
 # Create a dedicated NGINX config
 ynh_add_nginx_config
 
