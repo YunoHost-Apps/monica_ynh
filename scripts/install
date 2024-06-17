@@ -57,9 +57,9 @@ ynh_add_nginx_config
 #=================================================
 # INSTALL COMPOSER DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing Composer dependencies..."
+ynh_script_progression --message="Installing composer dependencies..."
 
-ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --composerversion="$YNH_COMPOSER_VERSION" --workdir="$install_dir"
+ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$install_dir"
 
 chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
@@ -85,11 +85,11 @@ ynh_replace_string --target_file="$install_dir/package.json" --match_string="php
 #=================================================
 # DEPLOY
 #=================================================
-ynh_script_progression --message="Deploying $app..."
+ynh_script_progression --message="Deploying..."
 
 pushd "$install_dir"
 	ynh_use_nodejs
-	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install --production
+	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install
 	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn run production
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan setup:production --force --email=$email --password=$password
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
@@ -101,6 +101,7 @@ pushd "$install_dir"
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$install_dir/key.txt"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
+    ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan optimize:clear
 popd
 
 # Calculate and store the config file checksum into the app settings
@@ -108,13 +109,6 @@ ynh_store_file_checksum --file="$install_dir/.env"
 
 chmod 400 "$install_dir/.env"
 chown $app:$app "$install_dir/.env"
-
-#==================================================
-# FIX PHP VERSION
-#==================================================
-ynh_script_progression --message="Fixing PHP version in package.json..." --weight=1
-
-ynh_replace_string --target_file="$install_dir/package.json" --match_string="php artisan lang:generate -vvv" --replace_string="php$phpversion artisan lang:generate -vvv"
 
 #=================================================
 # INSTALL THE CRON FILE
