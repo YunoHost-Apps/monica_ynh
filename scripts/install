@@ -107,6 +107,7 @@ pushd "$install_dir"
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$install_dir/key.txt"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
+        ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan cache:clear
 popd
 
 # Calculate and store the config file checksum into the app settings
