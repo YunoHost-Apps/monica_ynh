@@ -15,18 +15,12 @@ source /usr/share/yunohost/helpers
 
 random_key=$(ynh_string_random --length=32)
 email=$(ynh_user_get_info --username=$admin --key="mail")
-fpm_footprint="low"
-fpm_free_footprint=0
-fpm_usage="low"
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
 ynh_app_setting_set --app=$app --key=random_key --value=$random_key
-ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
-ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
-ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -48,12 +42,6 @@ ynh_setup_source --dest_dir="$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
 
-#=================================================
-# PHP-FPM CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring PHP-FPM..." --weight=1
-
-ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config
@@ -107,7 +95,7 @@ pushd "$install_dir"
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$install_dir/key.txt"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
-        ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan optimize:clear
+    ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan optimize:clear
 popd
 
 # Calculate and store the config file checksum into the app settings
