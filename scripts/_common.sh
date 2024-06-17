@@ -4,11 +4,9 @@
 # COMMON VARIABLES
 #=================================================
 
-#REMOVEME? YNH_PHP_VERSION="8.1"
+YNH_COMPOSER_VERSION="2.6.5"
 
-YNH_COMPOSER_VERSION="2.5.1"
-
-NODEJS_VERSION=18
+NODEJS_VERSION="20"
 
 #=================================================
 # PERSONAL HELPERS

@@ -15,18 +15,12 @@ source /usr/share/yunohost/helpers
 
 random_key=$(ynh_string_random --length=32)
 email=$(ynh_user_get_info --username=$admin --key="mail")
-fpm_footprint="low"
-fpm_free_footprint=0
-fpm_usage="low"
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
 ynh_app_setting_set --app=$app --key=random_key --value=$random_key
-ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
-ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
-ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -53,7 +47,7 @@ chown -R $app:www-data "$install_dir"
 #=================================================
 ynh_script_progression --message="Configuring PHP-FPM..." --weight=1
 
-ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
+ynh_add_fpm_config
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config
@@ -63,7 +57,7 @@ ynh_add_nginx_config
 #=================================================
 # INSTALL COMPOSER DEPENDENCIES
 #=================================================
-#REMOVEME? ynh_script_progression --message="Installing composer dependencies..."
+ynh_script_progression --message="Installing composer dependencies..."
 
 ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$install_dir"
 
@@ -80,6 +74,13 @@ ynh_add_config --template=".env" --destination="$install_dir/.env"
 
 chmod 600 $install_dir/.env
 chown $app:$app $install_dir/.env
+
+#==================================================
+# FIX PHP VERSION
+#==================================================
+ynh_script_progression --message="Fixing php version in package.json..." --weight=1
+
+ynh_replace_string --target_file="$install_dir/package.json" --match_string="php artisan lang:generate -vvv" --replace_string="php$phpversion artisan lang:generate -vvv"
 
 #=================================================
 # DEPLOY
@@ -100,6 +101,7 @@ pushd "$install_dir"
 	ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
 	ynh_secure_remove --file="$install_dir/key.txt"
 	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
+    ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan optimize:clear
 popd
 
 # Calculate and store the config file checksum into the app settings
