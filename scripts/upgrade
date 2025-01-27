@@ -14,11 +14,8 @@ email=$(ynh_user_get_info --username=$admin --key=mail)
 #=================================================
 ynh_script_progression "Upgrading source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir" --keep=".env"
 
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:www-data "$install_dir"
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
@@ -33,7 +30,6 @@ ynh_script_progression "Updating $app's configuration files..."
 
 ynh_config_add_phpfpm
 
-# Create a dedicated NGINX config
 ynh_config_add_nginx
 
 #=================================================
@@ -45,9 +41,6 @@ ynh_safe_rm "$install_dir/vendor"
 ynh_composer_install
 ynh_composer_exec install --no-dev
 
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 750 "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:www-data "$install_dir"
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
@@ -70,9 +63,8 @@ ynh_replace --file="$install_dir/package.json" --match="php artisan lang:generat
 ynh_script_progression "Deploying..."
 
 pushd "$install_dir"
-
-	ynh_hide_warnings ynh_exec_as_app node_load_PATH yarn install
-	ynh_hide_warnings ynh_exec_as_app node_load_PATH yarn run production
+	ynh_hide_warnings ynh_exec_as_app yarn install
+	ynh_hide_warnings ynh_exec_as_app yarn run production
 	ynh_hide_warnings ynh_exec_as_app php$php_version artisan monica:update --force
 popd
 
@@ -98,11 +90,7 @@ pushd "$install_dir"
 	ynh_hide_warnings ynh_exec_as_app php$php_version artisan config:cache
 popd
 
-# Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum "$install_dir/.env"
-
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/.env"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:$app "$install_dir/.env"
 
 #=================================================
 # INSTALL THE CRON FILE
@@ -110,9 +98,6 @@ ynh_store_file_checksum "$install_dir/.env"
 ynh_script_progression "Setuping a cron..."
 
 ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
-
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown root: "/etc/cron.d/$app"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 644 "/etc/cron.d/$app"
 
 #=================================================
 # END OF SCRIPT
