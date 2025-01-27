@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -18,113 +12,95 @@ email=$(ynh_user_get_info --username=$admin --key=mail)
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Upgrading source files..." --weight=1
+ynh_script_progression "Upgrading source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir" --keep=".env"
-
-chmod -R o-rwx "$install_dir"
-chown -R $app:www-data "$install_dir"
 
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=1
+ynh_script_progression "Upgrading dependencies..."
 
-ynh_install_nodejs --nodejs_version=$NODEJS_VERSION
+ynh_nodejs_install
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Updating $app's configuration files..." --weight=1
+ynh_script_progression "Updating $app's configuration files..."
 
-ynh_add_fpm_config
+ynh_config_add_phpfpm
 
-# Create a dedicated NGINX config
-ynh_add_nginx_config
+ynh_config_add_nginx
 
-#=================================================
-# SPECIFIC UPGRADE
 #=================================================
 # UPDATE PHP DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Updating php dependencies..."
+ynh_script_progression "Updating php dependencies..."
 
-ynh_secure_remove --file="$install_dir/vendor"
-ynh_exec_warn_less ynh_install_composer --phpversion="$phpversion" --workdir="$install_dir"
-
-chmod 750 "$install_dir"
-chmod -R o-rwx "$install_dir"
-chown -R $app:www-data "$install_dir"
+ynh_safe_rm "$install_dir/vendor"
+ynh_composer_install
+ynh_composer_exec install --no-dev
 
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Updating a configuration file..." --weight=1
+ynh_script_progression "Updating configuration..."
 
-ynh_backup_if_checksum_is_different --file="$install_dir/.env"
+ynh_backup_if_checksum_is_different "$install_dir/.env"
 
-ynh_add_config --template=".env" --destination="$install_dir/.env"
+ynh_config_add --template=".env" --destination="$install_dir/.env"
 
 #==================================================
 # FIX PHP VERSION
 #==================================================
-ynh_script_progression --message="Fixing php version in package.json..." --weight=1
+ynh_script_progression "Fixing php version in package.json..."
 
-ynh_replace_string --target_file="$install_dir/package.json" --match_string="php artisan lang:generate -vvv" --replace_string="php$phpversion artisan lang:generate -vvv"
+ynh_replace --file="$install_dir/package.json" --match="php artisan lang:generate -vvv" --replace="php$php_version artisan lang:generate -vvv"
 
 #=================================================
 # DEPLOYMENT
 #=================================================
-ynh_script_progression --message="Deploying..."
+ynh_script_progression "Deploying..."
 
 pushd "$install_dir"
-	ynh_use_nodejs
-	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn install
-	ynh_exec_warn_less ynh_exec_as $app $ynh_node_load_PATH yarn run production
-	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan monica:update --force
+	ynh_hide_warnings ynh_exec_as_app yarn install
+	ynh_hide_warnings ynh_exec_as_app yarn run production
+	ynh_hide_warnings ynh_exec_as_app php$php_version artisan monica:update --force
 popd
 
 if [ -f $install_dir/storage/oauth-private.key ]; then
-	mobile_id=$(ynh_app_setting_get --app=$app --key=mobile_id)
-	mobile_key=$(ynh_app_setting_get --app=$app --key=mobile_key)
-	ynh_replace_string --match_string="mobile_id" --replace_string="$mobile_id" --target_file="$install_dir/.env"
-	ynh_replace_string --match_string="mobile_key" --replace_string="$mobile_key" --target_file="$install_dir/.env"
+	mobile_id=$(ynh_app_setting_get --key=mobile_id)
+	mobile_key=$(ynh_app_setting_get --key=mobile_key)
+	ynh_replace --match="mobile_id" --replace="$mobile_id" --file="$install_dir/.env"
+	ynh_replace --match="mobile_key" --replace="$mobile_key" --file="$install_dir/.env"
 else
 	pushd "$install_dir"
-		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:keys
-		ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan passport:client --password -n > key.txt
+		ynh_hide_warnings ynh_exec_as_app php$php_version artisan passport:keys
+		ynh_hide_warnings ynh_exec_as_app php$php_version artisan passport:client --password -n > key.txt
 		mobile_id=$( tail -2 key.txt | head -1 | cut -c 12- )
 		mobile_key=$( tail -1 key.txt | cut -c 16- )
-		ynh_replace_string --match_string="mobile_id" --replace_string="$mobile_id"   --target_file="$install_dir/.env"
-		ynh_replace_string --match_string="mobile_key" --replace_string="$mobile_key"  --target_file="$install_dir/.env"
-		ynh_app_setting_set --app=$app --key=mobile_id --value=$mobile_id
-		ynh_app_setting_set --app=$app --key=mobile_key --value=$mobile_key
-		ynh_secure_remove --file="$install_dir/key.txt"
+		ynh_replace --match="mobile_id" --replace="$mobile_id"   --file="$install_dir/.env"
+		ynh_replace --match="mobile_key" --replace="$mobile_key"  --file="$install_dir/.env"
+		ynh_app_setting_set --key=mobile_id --value=$mobile_id
+		ynh_app_setting_set --key=mobile_key --value=$mobile_key
+		ynh_safe_rm "$install_dir/key.txt"
 	popd
 fi
 pushd "$install_dir"
-	ynh_exec_warn_less ynh_exec_as $app php$phpversion artisan config:cache
+	ynh_hide_warnings ynh_exec_as_app php$php_version artisan config:cache
 popd
 
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$install_dir/.env"
-
-chmod 400 "$install_dir/.env"
-chown $app:$app "$install_dir/.env"
+ynh_store_file_checksum "$install_dir/.env"
 
 #=================================================
 # INSTALL THE CRON FILE
 #=================================================
-ynh_script_progression --message="Setuping a cron..." --weight=1
+ynh_script_progression "Setuping a cron..."
 
-ynh_add_config --template="cron" --destination="/etc/cron.d/$app"
-
-chown root: "/etc/cron.d/$app"
-chmod 644 "/etc/cron.d/$app"
+ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed" --last
+ynh_script_progression "Upgrade of $app completed"

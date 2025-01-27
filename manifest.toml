@@ -15,12 +15,12 @@ website = "https://monicahq.com"
 code = "https://github.com/monicahq/monica"
 
 [integration]
-yunohost = ">= 11.2"
+yunohost = ">= 12.0.9"
+helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
 
 ldap =  false
-
 sso = false
 
 disk = "50M"
@@ -65,12 +65,13 @@ ram.runtime = "50M"
     allow_email = true
 
     [resources.install_dir]
+    group = "www-data:r-x"
 
     [resources.permissions]
     main.url = "/"
 
     [resources.apt]
-    packages = "mariadb-server, php8.2-bcmath, php8.2-cli, php8.2-curl, php8.2-dom, php8.2-gd, php8.2-gmp, php8.2-iconv, php8.2-intl, php8.2-mbstring, php8.2-mysql, php8.2-mysqli, php8.2-opcache, php8.2-redis, php8.2-xml, php8.2-zip"
+    packages = "mariadb-server, php8.3-bcmath, php8.3-cli, php8.3-curl, php8.3-dom, php8.3-gd, php8.3-gmp, php8.3-iconv, php8.3-intl, php8.3-mbstring, php8.3-mysql, php8.3-mysqli, php8.3-opcache, php8.3-redis, php8.3-xml, php8.3-zip"
 
     extras.yarn.repo = "deb https://dl.yarnpkg.com/debian/ stable main"
     extras.yarn.key = "https://dl.yarnpkg.com/debian/pubkey.gpg"
