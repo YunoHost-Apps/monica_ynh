@@ -5,7 +5,9 @@ EZ editatu eskuz.
 
 # Monica YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)
+[![Integrazio maila](https://apps.yunohost.org/badge/integration/monica)](https://ci-apps.yunohost.org/ci/apps/monica/)
+![Funtzionamendu egoera](https://apps.yunohost.org/badge/state/monica)
+![Mantentze egoera](https://apps.yunohost.org/badge/maintained/monica)
 
 [![Instalatu Monica YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=monica)
 

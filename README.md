@@ -5,7 +5,9 @@ It shall NOT be edited by hand.
 
 # Monica for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![Working status](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)
+[![Integration level](https://apps.yunohost.org/badge/integration/monica)](https://ci-apps.yunohost.org/ci/apps/monica/)
+![Working status](https://apps.yunohost.org/badge/state/monica)
+![Maintenance status](https://apps.yunohost.org/badge/maintained/monica)
 
 [![Install Monica with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=monica)
 
