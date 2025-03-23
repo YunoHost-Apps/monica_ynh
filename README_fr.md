@@ -21,7 +21,7 @@ Il NE doit PAS être modifié à la main.
 Monica est une application web open source pour organiser les interactions avec vos proches. J'appelle cela Gestion des Relations Personnelles. Considérez-le comme un [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (un outil populaire utilisé par les équipes commerciales du monde de l'entreprise) pour vos amis ou votre famille.
 
 
-**Version incluse :** 4.1.2~ynh1
+**Version incluse :** 4.1.2~ynh2
 
 ## Captures d’écran
 
