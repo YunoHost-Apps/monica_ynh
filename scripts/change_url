@@ -16,8 +16,8 @@ ynh_config_change_url_nginx
 
 # Run monica update
 pushd "$install_dir"
-	/usr/bin/php$php_version artisan monica:update --force
-        /usr/bin/php$php_version artisan optimize:clear
+	php$php_version artisan monica:update --force
+    php$php_version artisan optimize:clear
 popd
 
 #=================================================
