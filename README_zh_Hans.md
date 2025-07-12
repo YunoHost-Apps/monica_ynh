@@ -5,7 +5,9 @@
 
 # YunoHost 上的 Monica
 
-[![集成程度](https://dash.yunohost.org/integration/monica.svg)](https://dash.yunohost.org/appci/app/monica) ![工作状态](https://ci-apps.yunohost.org/ci/badges/monica.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/monica.maintain.svg)
+[![集成程度](https://apps.yunohost.org/badge/integration/monica)](https://ci-apps.yunohost.org/ci/apps/monica/)
+![工作状态](https://apps.yunohost.org/badge/state/monica)
+![维护状态](https://apps.yunohost.org/badge/maintained/monica)
 
 [![使用 YunoHost 安装 Monica](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=monica)
 
@@ -19,7 +21,7 @@
 Monica is an open-source web application to organize the interactions with your loved ones. I call it a PRM, or Personal Relationship Management. Think of it as a [CRM](https://en.wikipedia.org/wiki/Customer_relationship_management) (a popular tool used by sales teams in the corporate world) for your friends or family.
 
 
-**分发版本：** 4.1.2~ynh1
+**分发版本：** 4.1.2~ynh2
 
 ## 截图
 
