@@ -71,7 +71,7 @@ ram.runtime = "50M"
     main.url = "/"
 
     [resources.apt]
-    packages = "mariadb-server, php8.4-bcmath, php8.4-cli, php8.4-curl, php8.4-dom, php8.4-gd, php8.4-gmp, php8.4-iconv, php8.4-intl, php8.4-mbstring, php8.4-mysql, php8.4-mysqli, php8.4-opcache, php8.4-redis, php8.4-xml, php8.4-zip"
+    packages = "mariadb-server, php8.3-bcmath, php8.3-cli, php8.3-curl, php8.3-dom, php8.3-gd, php8.3-gmp, php8.3-iconv, php8.3-intl, php8.3-mbstring, php8.3-mysql, php8.3-mysqli, php8.3-opcache, php8.3-redis, php8.3-xml, php8.3-zip"
 
     extras.yarn.repo = "deb https://dl.yarnpkg.com/debian/ stable main"
     extras.yarn.key = "https://dl.yarnpkg.com/debian/pubkey.gpg"
