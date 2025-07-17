@@ -5,7 +5,7 @@ name = "Monica"
 description.en = "Personal Relationship Manager"
 description.fr = "Gestionnaire de relations personnelles"
 
-version = "4.1.2~ynh3"
+version = "4.1.2~ynh4"
 
 maintainers = ["Sebastian Gumprich"]
 
