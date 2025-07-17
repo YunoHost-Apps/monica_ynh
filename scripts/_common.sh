@@ -6,4 +6,4 @@
 
 composer_version="2.8.10"
 
-nodejs_version="22"
+nodejs_version="20"
