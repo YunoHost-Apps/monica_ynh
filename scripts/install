@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source _common.sh
+
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -21,7 +21,7 @@ ynh_app_setting_set --key=random_key --value=$random_key
 #=================================================
 ynh_script_progression "Installing dependencies..."
 
-ynh_nodejs_install
+#REMOVEME? ynh_nodejs_install
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -44,7 +44,7 @@ ynh_config_add_nginx
 #=================================================
 ynh_script_progression "Installing composer dependencies..."
 
-ynh_composer_install
+#REMOVEME? ynh_composer_install
 ynh_composer_exec install --no-dev
 
 #=================================================

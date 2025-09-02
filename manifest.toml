@@ -15,7 +15,7 @@ website = "https://monicahq.com"
 code = "https://github.com/monicahq/monica"
 
 [integration]
-yunohost = ">= 12.0.9"
+yunohost = ">= 12.1.17"
 helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
@@ -79,3 +79,9 @@ ram.runtime = "50M"
 
     [resources.database]
     type = "mysql"
+
+    [resources.nodejs]
+    version = "20"
+
+    [resources.composer]
+    version = "2.8.10"
