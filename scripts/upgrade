@@ -55,11 +55,11 @@ ynh_script_progression "Deploying..."
 
 pushd "$install_dir"
 	corepack enable
-  ynh_hide_warnings corepack prepare yarn@latest --activate
+  	ynh_hide_warnings corepack prepare yarn@latest --activate
     
-	ynh_exec_warn_less ynh_exec_as_app yarn install --production
-	ynh_exec_warn_less ynh_exec_as_app yarn run production
-	ynh_exec_warn_less ynh_exec_as_app php$phpversion artisan monica:update --force
+	ynh_hide_warnings ynh_exec_as_app yarn install --production
+	ynh_hide_warnings ynh_exec_as_app yarn run production
+	ynh_hide_warnings ynh_exec_as_app php$phpversion artisan monica:update --force
 popd
 
 if [ -f $install_dir/storage/oauth-private.key ]; then
