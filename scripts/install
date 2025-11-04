@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -15,13 +14,6 @@ email=$(ynh_user_get_info --username=$admin --key="mail")
 #=================================================
 
 ynh_app_setting_set --key=random_key --value=$random_key
-
-#=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression "Installing dependencies..."
-
-ynh_nodejs_install
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -44,7 +36,6 @@ ynh_config_add_nginx
 #=================================================
 ynh_script_progression "Installing composer dependencies..."
 
-ynh_composer_install
 ynh_composer_exec install --no-dev
 
 #=================================================
@@ -69,6 +60,9 @@ ynh_replace --file="$install_dir/package.json" --match="php artisan lang:generat
 ynh_script_progression "Deploying..."
 
 pushd "$install_dir"
+	corepack enable
+    ynh_hide_warnings corepack prepare yarn@latest --activate
+	
 	ynh_hide_warnings ynh_exec_as_app yarn install
 	ynh_hide_warnings ynh_exec_as_app yarn run production
 	ynh_hide_warnings ynh_exec_as_app php$php_version artisan setup:production --force --email=$email --password=$password

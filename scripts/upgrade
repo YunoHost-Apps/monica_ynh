@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -17,13 +16,6 @@ ynh_script_progression "Upgrading source files..."
 ynh_setup_source --dest_dir="$install_dir" --keep=".env"
 
 #=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression "Upgrading dependencies..."
-
-ynh_nodejs_install
-
-#=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
 ynh_script_progression "Updating $app's configuration files..."
@@ -38,7 +30,6 @@ ynh_config_add_nginx
 ynh_script_progression "Updating php dependencies..."
 
 ynh_safe_rm "$install_dir/vendor"
-ynh_composer_install
 ynh_composer_exec install --no-dev
 
 #=================================================
@@ -63,6 +54,9 @@ ynh_replace --file="$install_dir/package.json" --match="php artisan lang:generat
 ynh_script_progression "Deploying..."
 
 pushd "$install_dir"
+	corepack enable
+    ynh_hide_warnings corepack prepare yarn@latest --activate
+
 	ynh_hide_warnings ynh_exec_as_app yarn install
 	ynh_hide_warnings ynh_exec_as_app yarn run production
 	ynh_hide_warnings ynh_exec_as_app php$php_version artisan monica:update --force

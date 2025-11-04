@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -16,13 +15,6 @@ ynh_restore "$install_dir"
 ynh_script_progression "Restoring the MySQL database..."
 
 ynh_mysql_db_shell < ./db.sql
-
-#=================================================
-# REINSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression "Reinstalling dependencies..."
-
-ynh_nodejs_install
 
 #=================================================
 # RESTORE THE PHP-FPM CONFIGURATION
