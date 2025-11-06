@@ -60,7 +60,7 @@ ram.runtime = "50M"
 
         [resources.sources.main]
         url = "https://github.com/monicahq/monica/releases/download/v4.1.2/monica-v4.1.2.tar.bz2"
-        sha256 = "792bb0af6bfb33abd3c4694eed309cf6c33001e589328c418bb1231e063d60d6"
+        sha256 = "ed974e488fe095d496b9be45232610c378292def8f4409ead37bba0d7759d981"
         autoupdate.strategy = "latest_github_tag"
         autoupdate.asset = "monica-v\\d+(\\.\\d+)+\\.tar\\.bz2"
 
