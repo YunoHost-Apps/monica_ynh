@@ -13,7 +13,7 @@ email=$(ynh_user_get_info --username=$admin --key=mail)
 #=================================================
 ynh_script_progression "Upgrading source files..."
 
-ynh_setup_source --dest_dir="$install_dir" --keep=".env storage" --full_replace=1
+ynh_setup_source --dest_dir="$install_dir" --keep=".env storage" --full_replace
 
 #=================================================
 # PHP-FPM CONFIGURATION
