@@ -13,7 +13,7 @@ email=$(ynh_user_get_info --username=$admin --key=mail)
 #=================================================
 ynh_script_progression "Upgrading source files..."
 
-ynh_setup_source --dest_dir="$install_dir" --keep=".env"
+ynh_setup_source --dest_dir="$install_dir" --keep=".env storage" --full_replace
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -24,13 +24,6 @@ ynh_config_add_phpfpm
 
 ynh_config_add_nginx
 
-#=================================================
-# UPDATE PHP DEPENDENCIES
-#=================================================
-ynh_script_progression "Updating php dependencies..."
-
-ynh_safe_rm "$install_dir/vendor"
-ynh_composer_exec install --no-dev
 
 #=================================================
 # UPDATE A CONFIG FILE
@@ -52,15 +45,6 @@ ynh_replace --file="$install_dir/package.json" --match="php artisan lang:generat
 # DEPLOYMENT
 #=================================================
 ynh_script_progression "Deploying..."
-
-pushd "$install_dir"
-	corepack enable
-    ynh_hide_warnings corepack prepare yarn@latest --activate
-
-	ynh_hide_warnings ynh_exec_as_app yarn install
-	ynh_hide_warnings ynh_exec_as_app yarn run production
-	ynh_hide_warnings ynh_exec_as_app php$php_version artisan monica:update --force
-popd
 
 if [ -f $install_dir/storage/oauth-private.key ]; then
 	mobile_id=$(ynh_app_setting_get --key=mobile_id)
