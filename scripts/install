@@ -61,12 +61,12 @@ ynh_script_progression "Deploying..."
 
 pushd "$install_dir"
 	corepack enable
-    ynh_hide_warnings corepack prepare yarn@latest --activate
+  ynh_hide_warnings corepack prepare yarn@latest --activate
 	
-	ynh_hide_warnings ynh_exec_as_app yarn install
+	ynh_hide_warnings ynh_exec_as_app yarn install --production
 	ynh_hide_warnings ynh_exec_as_app yarn run production
-	ynh_hide_warnings ynh_exec_as_app php$php_version artisan setup:production --force --email=$email --password=$password
-	ynh_hide_warnings ynh_exec_as_app php$php_version artisan passport:client --password -n > key.txt
+	ynh_hide_warnings ynh_exec_as_app php$phpversion artisan setup:production --force --email=$email --password=$password
+	ynh_hide_warnings ynh_exec_as_app php$phpversion artisan passport:client --password -n > key.txt
 	mobile_id=$( cd $install_dir && tail -2 key.txt | head -1 | cut -c 12- )
 	mobile_key=$( cd $install_dir && tail -1 key.txt | cut -c 16- )
 	ynh_replace  --match="mobile_id"  --replace="$mobile_id"  --file="$install_dir/.env"
@@ -75,7 +75,7 @@ pushd "$install_dir"
 	ynh_app_setting_set --key=mobile_key --value=$mobile_key
 	ynh_safe_rm "$install_dir/key.txt"
 	ynh_hide_warnings ynh_exec_as_app php$php_version artisan config:cache
-    ynh_hide_warnings ynh_exec_as_app php$php_version artisan optimize:clear
+  ynh_hide_warnings ynh_exec_as_app php$php_version artisan optimize:clear
 popd
 
 ynh_store_file_checksum "$install_dir/.env"
