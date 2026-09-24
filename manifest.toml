@@ -80,4 +80,4 @@ ram.runtime = "50M"
     version = "20"
 
     [resources.composer]
-    version = "2.10.2"
+    version = "2.10.3"
